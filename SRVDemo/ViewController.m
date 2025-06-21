@@ -12,17 +12,17 @@
 #import <Masonry/Masonry.h>
 #import <NEKit/NEKit-Swift.h>
 #import "SRVDemo-Swift.h"
+#import "SRVpnTableCell.h"
 
 @interface ViewController ()<UITableViewDelegate,UITableViewDataSource>
 @property (nonatomic,strong) UITableView  * tableView ;
-@property (nonatomic,strong) NSArray  *  proxyItems;
-@property (nonatomic,strong) NSDictionary  * serviceInfo ;
 
 @property (nonatomic,strong) UIButton  * startVpnBtn ;
 @property (nonatomic,strong) UIButton  * disconnectVpnBtn ;
 
 
 @property (nonatomic, strong) NEKitProxyWrapper *proxyWrapper;
+@property (nonatomic,strong) NSArray <ClashProxyModel*> * proxyArray ;
 
 @end
 
@@ -31,9 +31,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
-    [self setUI];
-    [self initSSVPN];
     [self fetchSubscriptionAsync];
+    [self setUI];
+ 
     // 创建 Shadowsocks 配置
 //    NEKitProxyWrapper *proxyWrapper = [[NEKitProxyWrapper alloc] init];
   
@@ -41,33 +41,83 @@
 }
 - (void)setUI{
     
-    UIButton * startVpnBtn = [[UIButton alloc]init];
-    [startVpnBtn setTitle:@"开始连接" forState:UIControlStateNormal];
-    [startVpnBtn addTarget:self action:@selector(startConnect) forControlEvents:UIControlEventTouchUpInside];
-    [startVpnBtn setBackgroundColor:[UIColor blueColor]];
-    [startVpnBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [self.view addSubview:startVpnBtn];
-    self.startVpnBtn = startVpnBtn;
-    [self.startVpnBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerX.mas_equalTo(self.view);
-        make.bottom.mas_equalTo(self.view.mas_centerY).offset(-10);
-        make.size.mas_equalTo(CGSizeMake(200, 40));
-    }];
+//    UIButton * startVpnBtn = [[UIButton alloc]init];
+//    [startVpnBtn setTitle:@"开始连接" forState:UIControlStateNormal];
+//    [startVpnBtn addTarget:self action:@selector(startConnect) forControlEvents:UIControlEventTouchUpInside];
+//    [startVpnBtn setBackgroundColor:[UIColor blueColor]];
+//    [startVpnBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//    [self.view addSubview:startVpnBtn];
+//    self.startVpnBtn = startVpnBtn;
+//    [self.startVpnBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.centerX.mas_equalTo(self.view);
+//        make.bottom.mas_equalTo(self.view.mas_centerY).offset(-10);
+//        make.size.mas_equalTo(CGSizeMake(200, 40));
+//    }];
+//    
+//    UIButton * disconnectBtn = [[UIButton alloc]init];
+//    [disconnectBtn setTitle:@"断开连接" forState:UIControlStateNormal];
+//    [disconnectBtn addTarget:self action:@selector(startConnect) forControlEvents:UIControlEventTouchUpInside];
+//    [disconnectBtn setBackgroundColor:[UIColor redColor]];
+//    [disconnectBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//    [self.view addSubview:disconnectBtn];
+//    [disconnectBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.centerX.mas_equalTo(self.view);
+//        make.top.mas_equalTo(self.view.mas_centerY).offset(10);
+//        make.size.mas_equalTo(CGSizeMake(200, 40));
+//    }];
+//    self.disconnectVpnBtn = disconnectBtn;
     
-    UIButton * disconnectBtn = [[UIButton alloc]init];
-    [disconnectBtn setTitle:@"断开连接" forState:UIControlStateNormal];
-    [disconnectBtn addTarget:self action:@selector(startConnect) forControlEvents:UIControlEventTouchUpInside];
-    [disconnectBtn setBackgroundColor:[UIColor redColor]];
-    [disconnectBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [self.view addSubview:disconnectBtn];
-    [disconnectBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerX.mas_equalTo(self.view);
-        make.top.mas_equalTo(self.view.mas_centerY).offset(10);
-        make.size.mas_equalTo(CGSizeMake(200, 40));
-    }];
-    self.disconnectVpnBtn = disconnectBtn;
+    // 初始化 tableView
+   self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+   self.tableView.dataSource = self;
+   self.tableView.delegate = self;
+   // 注册自定义 cell
+   [self.tableView registerClass:[SRVpnTableCell class] forCellReuseIdentifier:NSStringFromClass([SRVpnTableCell class])];
+   [self.view addSubview:self.tableView];
     
     
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.proxyArray.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    SRVpnTableCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([SRVpnTableCell class]) forIndexPath:indexPath];
+    cell.proxyModel = self.proxyArray[indexPath.row];
+    return cell;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 70;
+}
+
+#pragma mark - UITableViewDelegate
+
+// 处理 cell 点击事件（这里主要依靠 setSelected 方法处理左侧圆圈显示，也可在此做更多自定义逻辑）
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    ClashProxyModel * model = self.proxyArray[indexPath.row];
+    self.proxyWrapper = [[NEKitProxyWrapper alloc] init];
+    
+    // 从订阅数据中提取 Shadowsocks 配置
+    NSString *serverAddress = model.server; // 从订阅数据中获取
+    UInt16 port = model.port; // 从订阅数据中获取
+    NSString *password = model.password; // 从订阅数据中获取
+    NSString *encryption = model.cipher; // 从订阅数据中获取
+    
+    // 设置 Shadowsocks 代理
+    [self.proxyWrapper setupShadowSocksProxyWithServerAddress:serverAddress
+                                                        port:port
+                                                    password:password
+                                                  encryption:encryption];
+    NSError *error = nil;
+    [self.proxyWrapper startProxyAndReturnError:&error];
+    if (error) {
+        NSLog(@"xh启动 VPN 失败: %@", error.localizedDescription);
+        model.connectType = ClashConnectFail;
+    } else {
+        NSLog(@"xhVPN 已启动");
+        model.connectType = ClashConnectSuccess;
+    }
 }
 // 开始链接
 - (void)startConnect{
@@ -97,7 +147,6 @@
             return;
         }
     
-        // 解析响应数据（仍在后台线程）
         NSString *content = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         
         // 回到主线程更新UI
@@ -114,15 +163,9 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSDictionary *configDict = [YAMLParser parseYAMLFromString:content];
         ClashConfigModel *config = [ClashConfigModel modelWithDictionary:configDict];
-           
-        // 访问代理数据
-        for (ClashProxyModel *proxy in config.proxies) {
-            NSLog(@"代理名称: %@", proxy.name);
-            NSLog(@"服务器: %@:%ld", proxy.server, (long)proxy.port);
-        }
-        NSLog(@"== tk解析订阅信息成功 ===");
+        self.proxyArray = config.proxies;
     dispatch_async(dispatch_get_main_queue(), ^{
-//            [self updateUIWithConfig:config];
+          [self.tableView reloadData];
         });
     });
 }
@@ -200,22 +243,7 @@
 - (void)disconnectIKEVPN {
     [[NEVPNManager sharedManager].connection stopVPNTunnel];
 }
-- (void)initSSVPN{
-    // 创建代理管理器
-     self.proxyWrapper = [[NEKitProxyWrapper alloc] init];
-     
-     // 从订阅数据中提取 Shadowsocks 配置
-     NSString *serverAddress = @"139.224.0.129"; // 从订阅数据中获取
-     UInt16 port = 4000; // 从订阅数据中获取
-     NSString *password = @"c1fbb9c4-73b4-45f4-84b2-a4db9258fcf0"; // 从订阅数据中获取
-     NSString *encryption = @"aes-256-gcm"; // 从订阅数据中获取
-     
-     // 设置 Shadowsocks 代理
-     [self.proxyWrapper setupShadowSocksProxyWithServerAddress:serverAddress
-                                                         port:port
-                                                     password:password
-                                                   encryption:encryption];
-}
+
 - (void)startSSVPN {
     NSError *error = nil;
     [self.proxyWrapper startProxyAndReturnError:&error];

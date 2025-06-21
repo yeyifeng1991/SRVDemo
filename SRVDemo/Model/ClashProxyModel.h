@@ -11,6 +11,12 @@ typedef NS_ENUM(NSInteger, ClashProxyType) {
     ClashProxyTypeTrojan,
     ClashProxyTypeUnknown
 };
+
+typedef NS_ENUM(NSInteger, ClashConnectType) {
+    ClashConnectDefault, // 默认连接
+    ClashConnectFail, // 链接失败
+    ClashConnectSuccess // 链接成功
+};
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ClashProxyModel : NSObject
@@ -23,6 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL udp;
 @property (nonatomic, copy) NSString *sni;
 @property (nonatomic, assign) BOOL skipCertVerify;
+@property (nonatomic,assign) ClashConnectType connectType ; // 是否连接
+
 
 + (NSArray<ClashProxyModel *> *)parseFromArray:(NSArray *)array;
 - (NSString *)description;
