@@ -12,7 +12,7 @@ import ObjectiveC
 
 // 使用 MainActor 确保在主队列上访问
 private class TunnelManager {
-    static let shared = TunnelManager()
+    @MainActor static let shared = TunnelManager()
         private init() {}
         
         private var tunnelsMap: [ObjectIdentifier: [Tunnel]] = [:]
