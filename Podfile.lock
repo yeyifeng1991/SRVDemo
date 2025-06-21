@@ -1,0 +1,82 @@
+PODS:
+  - AFNetworking (4.0.1):
+    - AFNetworking/NSURLSession (= 4.0.1)
+    - AFNetworking/Reachability (= 4.0.1)
+    - AFNetworking/Security (= 4.0.1)
+    - AFNetworking/Serialization (= 4.0.1)
+    - AFNetworking/UIKit (= 4.0.1)
+  - AFNetworking/NSURLSession (4.0.1):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (4.0.1)
+  - AFNetworking/Security (4.0.1)
+  - AFNetworking/Serialization (4.0.1)
+  - AFNetworking/UIKit (4.0.1):
+    - AFNetworking/NSURLSession
+  - Bugly (2.5.0)
+  - CocoaAsyncSocket (7.6.5)
+  - CocoaLumberjack/Core (3.7.4)
+  - CocoaLumberjack/Swift (3.7.4):
+    - CocoaLumberjack/Core
+  - IQKeyboardManager (6.5.19)
+  - Masonry (1.1.0)
+  - MJRefresh (3.7.9)
+  - MMDB-Swift (0.5.1)
+  - NEKit (0.0.4):
+    - CocoaAsyncSocket (~> 7.6.4)
+    - CocoaLumberjack/Swift (~> 3.7.0)
+    - MMDB-Swift (~> 0.5.1)
+    - sodium-ios (~> 0.0.2)
+    - Yaml (~> 3.4.4)
+  - SDWebImage (5.21.1):
+    - SDWebImage/Core (= 5.21.1)
+  - SDWebImage/Core (5.21.1)
+  - sodium-ios (0.0.2)
+  - Yaml (3.4.4)
+  - YYModel (1.0.4)
+
+DEPENDENCIES:
+  - AFNetworking
+  - Bugly (= 2.5.0)
+  - IQKeyboardManager
+  - Masonry (= 1.1.0)
+  - MJRefresh
+  - NEKit
+  - SDWebImage
+  - YYModel
+
+SPEC REPOS:
+  trunk:
+    - AFNetworking
+    - Bugly
+    - CocoaAsyncSocket
+    - CocoaLumberjack
+    - IQKeyboardManager
+    - Masonry
+    - MJRefresh
+    - MMDB-Swift
+    - NEKit
+    - SDWebImage
+    - sodium-ios
+    - Yaml
+    - YYModel
+
+SPEC CHECKSUMS:
+  AFNetworking: 3bd23d814e976cd148d7d44c3ab78017b744cd58
+  Bugly: 3ca9f255c01025582df26f9222893b383c7e4b4e
+  CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
+  CocoaLumberjack: 543c79c114dadc3b1aba95641d8738b06b05b646
+  IQKeyboardManager: c8665b3396bd0b79402b4c573eac345a31c7d485
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  MJRefresh: ff9e531227924c84ce459338414550a05d2aea78
+  MMDB-Swift: c1089703b65a3d1301fc92ff8f55d4794a569214
+  NEKit: 3c658d89a4a17c3143f887c3034ef65106fb3fae
+  SDWebImage: f29024626962457f3470184232766516dee8dfea
+  sodium-ios: ebfdcc372b70d59940dc22a989f7cdd4c8a72ba2
+  Yaml: 52831fc1d9ac2db4ddf6d7562993457127256ca6
+  YYModel: 2a7fdd96aaa4b86a824e26d0c517de8928c04b30
+
+PODFILE CHECKSUM: 200f4bc429dcdc39ba14e0d167f472774936177d
+
+COCOAPODS: 1.16.2
