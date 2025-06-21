@@ -72,6 +72,7 @@
 // 开始链接
 - (void)startConnect{
     NSLog(@"开始链接");
+    [self startSSVPN];
     
 }
 
