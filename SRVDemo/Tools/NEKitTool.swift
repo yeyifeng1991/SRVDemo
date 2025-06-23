@@ -78,78 +78,66 @@ extension GCDSOCKS5ProxyServer {
         }
     }
     
+    // 修改 GCDSOCKS5ProxyServer 扩展
     private func applyRuleManager(_ ruleManager: RuleManager) async {
-        // 尝试获取隧道的最大次数
-        let maxAttempts = 3
-        var tunnels: [Tunnel]?
-        
-        // 尝试多次获取隧道列表（带延迟重试）
-        for attempt in 1...maxAttempts {
-            tunnels = getTunnelsByRuntime()
-            if tunnels != nil {
-                break
-            }
-            
-            // 不是最后一次尝试时等待
-            if attempt < maxAttempts {
-                print("⚠️ 尝试 \(attempt)/\(maxAttempts) 获取隧道失败，等待后重试...")
-                // 等待 200 毫秒
-                try? await Task.sleep(nanoseconds: 200 * 1_000_000)
-            }
-        }
-        
-        // 成功获取隧道
-        if let tunnels = tunnels {
-            print("✅ 成功获取隧道列表（数量: \(tunnels.count)）")
-            await TunnelManager.shared.setTunnels(tunnels, for: self)
-            await TunnelManager.shared.applyRuleManager(ruleManager, to: self)
-            return
-        }
-        
-        // 尝试使用缓存隧道
-        if await TunnelManager.shared.hasTunnels(for: self) {
-            print("⚠️ 使用缓存的隧道列表")
-            await TunnelManager.shared.applyRuleManager(ruleManager, to: self)
-            return
-        }
-        
-        // 最终失败处理
-        print("⚠️ 无法获取隧道列表，规则应用失败（尝试了 \(maxAttempts) 次）")
-        // 尝试直接设置规则（即使没有隧道，可能部分代理仍能工作）
+        // 先尝试直接设置规则（优先级最高）
         do {
             try await attemptDirectRuleApplication(ruleManager)
-        } catch {
-            print("⚠️ 直接规则应用失败: \(error.localizedDescription)")
-        }
-    }
-    
-    // 尝试直接应用规则（最后手段）
-    private func attemptDirectRuleApplication(_ ruleManager: RuleManager) async throws {
-        print("⚠️ 尝试直接应用规则...")
-        
-        // 尝试直接设置规则到代理服务器
-        if responds(to: Selector("setRuleManager:")) {
-            print("⚠️ 通过 setRuleManager: 方法应用规则")
-            perform(Selector("setRuleManager:"), with: ruleManager)
+            print("✅ 直接规则设置成功")
             return
+        } catch {
+            print("⚠️ 直接规则设置失败: \(error.localizedDescription)")
         }
         
-        // 尝试其他可能的设置方法
-        let possibleSelectors = [
-            "applyRuleManager:", "configureWithRuleManager:",
-            "updateRuleManager:", "setRuleConfiguration:"
+        // 再尝试通过隧道设置规则
+        let maxAttempts = 5
+        var tunnels: [Tunnel]?
+        
+        for attempt in 1...maxAttempts {
+            tunnels = getTunnelsByRuntime()
+            if let tunnels = tunnels, !tunnels.isEmpty {
+                print("✅ 获取隧道成功 (数量: \(tunnels.count))")
+                await TunnelManager.shared.setTunnels(tunnels, for: self)
+                await TunnelManager.shared.applyRuleManager(ruleManager, to: self)
+                return
+            }
+            
+            if attempt < maxAttempts {
+                print("⚠️ 隧道获取失败 (尝试 \(attempt)/\(maxAttempts))，等待重试...")
+                try? await Task.sleep(nanoseconds: 300 * 1_000_000) // 300ms
+            }
+        }
+        
+        // 最终回退到直接设置
+        print("⚠️ 最终尝试直接设置规则")
+        try? await attemptDirectRuleApplication(ruleManager)
+    }
+
+    // 增强的直接规则应用方法
+    private func attemptDirectRuleApplication(_ ruleManager: RuleManager) async throws {
+        // 尝试多种设置方式
+        let selectors = [
+            "setRuleManager:", "applyRuleManager:",
+            "configureWithRules:", "updateRules:"
         ]
         
-        for selectorName in possibleSelectors {
+        for selectorName in selectors {
             let selector = Selector(selectorName)
             if responds(to: selector) {
-                print("⚠️ 通过 \(selectorName) 方法应用规则")
+                print("✅ 通过 \(selectorName) 设置规则")
                 perform(selector, with: ruleManager)
                 return
             }
         }
         
-        throw NSError(domain: "NEKitError", code: 2001, userInfo: [
+        // 尝试 KVC 方式
+        if responds(to: Selector("setRuleManager:")) {
+            setValue(ruleManager, forKey: "ruleManager")
+            print("✅ 通过 KVC 设置规则")
+            return
+        }
+        
+        throw NSError(domain: "NEKitError", code: 3001, userInfo: [
             NSLocalizedDescriptionKey: "无可用规则设置方法"
         ])
     }
