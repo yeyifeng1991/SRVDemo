@@ -79,20 +79,79 @@ extension GCDSOCKS5ProxyServer {
     }
     
     private func applyRuleManager(_ ruleManager: RuleManager) async {
-        // 使用安全的运行时方法获取隧道
-        if let tunnels = getTunnelsByRuntime() {
+        // 尝试获取隧道的最大次数
+        let maxAttempts = 3
+        var tunnels: [Tunnel]?
+        
+        // 尝试多次获取隧道列表（带延迟重试）
+        for attempt in 1...maxAttempts {
+            tunnels = getTunnelsByRuntime()
+            if tunnels != nil {
+                break
+            }
+            
+            // 不是最后一次尝试时等待
+            if attempt < maxAttempts {
+                print("⚠️ 尝试 \(attempt)/\(maxAttempts) 获取隧道失败，等待后重试...")
+                // 等待 200 毫秒
+                try? await Task.sleep(nanoseconds: 200 * 1_000_000)
+            }
+        }
+        
+        // 成功获取隧道
+        if let tunnels = tunnels {
+            print("✅ 成功获取隧道列表（数量: \(tunnels.count)）")
             await TunnelManager.shared.setTunnels(tunnels, for: self)
             await TunnelManager.shared.applyRuleManager(ruleManager, to: self)
             return
         }
         
-        // 使用之前缓存的隧道
+        // 尝试使用缓存隧道
         if await TunnelManager.shared.hasTunnels(for: self) {
+            print("⚠️ 使用缓存的隧道列表")
             await TunnelManager.shared.applyRuleManager(ruleManager, to: self)
             return
         }
         
-        print("⚠️ 无法获取隧道列表，规则应用失败")
+        // 最终失败处理
+        print("⚠️ 无法获取隧道列表，规则应用失败（尝试了 \(maxAttempts) 次）")
+        // 尝试直接设置规则（即使没有隧道，可能部分代理仍能工作）
+        do {
+            try await attemptDirectRuleApplication(ruleManager)
+        } catch {
+            print("⚠️ 直接规则应用失败: \(error.localizedDescription)")
+        }
+    }
+    
+    // 尝试直接应用规则（最后手段）
+    private func attemptDirectRuleApplication(_ ruleManager: RuleManager) async throws {
+        print("⚠️ 尝试直接应用规则...")
+        
+        // 尝试直接设置规则到代理服务器
+        if responds(to: Selector("setRuleManager:")) {
+            print("⚠️ 通过 setRuleManager: 方法应用规则")
+            perform(Selector("setRuleManager:"), with: ruleManager)
+            return
+        }
+        
+        // 尝试其他可能的设置方法
+        let possibleSelectors = [
+            "applyRuleManager:", "configureWithRuleManager:",
+            "updateRuleManager:", "setRuleConfiguration:"
+        ]
+        
+        for selectorName in possibleSelectors {
+            let selector = Selector(selectorName)
+            if responds(to: selector) {
+                print("⚠️ 通过 \(selectorName) 方法应用规则")
+                perform(selector, with: ruleManager)
+                return
+            }
+        }
+        
+        throw NSError(domain: "NEKitError", code: 2001, userInfo: [
+            NSLocalizedDescriptionKey: "无可用规则设置方法"
+        ])
     }
     
     private func getTunnelsByRuntime() -> [Tunnel]? {
@@ -158,6 +217,7 @@ extension SOCKS5ProxySocket: RuleSupporting {
             perform(Selector("setRuleManager:"), with: manager)
         }
     }
+    
 }
 
 // MARK: - 隧道规则支持
@@ -254,19 +314,27 @@ extension Tunnel {
                                            password: String,
                                            encryption: String) {
         let portObj = Port(port: port)
-        let algorithmString = CryptoAlgorithmConverter.convertToNEKitAlgorithmString(encryption)
-        
-        let algorithm: CryptoAlgorithm
-        switch algorithmString {
-        case "AES128CFB": algorithm = .AES128CFB
-        case "AES192CFB": algorithm = .AES192CFB
-        case "AES256CFB": algorithm = .AES256CFB
-        case "CHACHA20": algorithm = .CHACHA20
-        case "SALSA20": algorithm = .SALSA20
-        case "RC4MD5": algorithm = .RC4MD5
-        default: algorithm = .AES256CFB
-        }
-        
+        // 添加对 ChaCha20-IETF-Poly1305 的支持
+           let algorithmString = encryption.uppercased().replacingOccurrences(of: " ", with: "")
+           
+           let algorithm: CryptoAlgorithm
+           switch algorithmString {
+           case "AES-128-CFB", "AES128CFB": algorithm = .AES128CFB
+           case "AES-192-CFB", "AES192CFB": algorithm = .AES192CFB
+           case "AES-256-CFB", "AES256CFB": algorithm = .AES256CFB
+           case "CHACHA20", "CHACHA20-IETF": algorithm = .CHACHA20
+           case "CHACHA20-IETF-POLY1305":
+               algorithm = .CHACHA20  // 使用 ChaCha20 替代
+               print("⚠️ 使用 ChaCha20 替代 ChaCha20-IETF-Poly1305")
+           case "SALSA20": algorithm = .SALSA20
+           case "RC4-MD5", "RC4MD5": algorithm = .RC4MD5
+           case "AES-256-GCM":
+               algorithm = .CHACHA20  // 将 GCM 回退到 ChaCha20
+               print("⚠️ 使用 ChaCha20 替代 AES-256-GCM")
+           default:
+               algorithm = .AES256CFB
+               print("⚠️ 使用默认算法 AES-256-CFB")
+           }
         let cryptorFactory = ShadowsocksAdapter.CryptoStreamProcessor.Factory(
             password: password,
             algorithm: algorithm
@@ -283,7 +351,14 @@ extension Tunnel {
         let proxyRule = AllRule(adapterFactory: ssAdapterFactory)
         let ruleManager = RuleManager(fromRules: [proxyRule], appendDirect: false)
         let localhost = IPAddress(fromString: "127.0.0.1")!
-        let proxyServer = GCDSOCKS5ProxyServer(address: localhost, port: Port(port: 1080))
+        // 使用随机端口避免冲突
+         let randomLocalPort = UInt16.random(in: 10000..<60000)
+         let proxyServer = GCDSOCKS5ProxyServer(
+             address: localhost,
+             port: Port(port: randomLocalPort)  // 使用随机端口
+         )
+         
+         print("xh✅ 使用本地端口: \(randomLocalPort)")
         
         proxyServer.ruleManager = ruleManager
         self.proxyServer = proxyServer

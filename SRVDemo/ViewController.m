@@ -103,32 +103,43 @@
     UInt16 port = model.port; // 从订阅数据中获取
     NSString *password = model.password; // 从订阅数据中获取
     NSString *encryption = model.cipher; // 从订阅数据中获取
-    
+    NSLog(@"model.server:%@\n port:%ld\n password:%@\n encryption: %@",serverAddress,model.port,password,encryption);
     // 设置 Shadowsocks 代理
-    [self.proxyWrapper setupShadowSocksProxyWithServerAddress:serverAddress
-                                                        port:port
-                                                    password:password
-                                                  encryption:encryption];
-    NSError *error = nil;
-    [self.proxyWrapper startProxyAndReturnError:&error];
-    if (error) {
-        NSLog(@"xh启动 VPN 失败: %@", error.localizedDescription);
+    // 尝试多次启动
+    for (int i = 0; i < 3; i++) {
+        [self.proxyWrapper setupShadowSocksProxyWithServerAddress:serverAddress
+                                                            port:port
+                                                        password:password
+                                                      encryption:encryption];
+        
+        NSError *error = nil;
+        [self.proxyWrapper startProxyAndReturnError:&error];
+        
+        if (!error) {
+            NSLog(@"✅ VPN 成功启动 (尝试 %d)", i+1);
+            model.connectType = ClashConnectSuccess;
+            break;
+        }
+        
+        NSLog(@"⚠️ 启动失败 (尝试 %d): %@", i+1, error.localizedDescription);
+        [NSThread sleepForTimeInterval:0.5]; // 等待0.5秒后重试
+    }
+
+    if (model.connectType != ClashConnectSuccess) {
+        NSLog(@"❌ VPN 启动失败");
         model.connectType = ClashConnectFail;
-    } else {
-        NSLog(@"xhVPN 已启动");
-        model.connectType = ClashConnectSuccess;
     }
 }
 // 开始链接
 - (void)startConnect{
-    NSLog(@"开始链接");
+    NSLog(@"xh开始链接");
     [self startSSVPN];
     
 }
 
 // 断开链接
 - (void)disConnect{
-    NSLog(@"断开链接");
+    NSLog(@"xh断开链接");
 }
 - (void)fetchSubscriptionAsync {
     NSURL *url = [NSURL URLWithString:@"http://subscribe.ayouran.com/cc60f6fe9d774792b031665496911234/subscribe"];
