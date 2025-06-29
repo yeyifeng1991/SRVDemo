@@ -34,6 +34,13 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
+    // 添加VPN状态监听
+   [[NSNotificationCenter defaultCenter]
+       addObserver:self
+       selector:@selector(handleVPNStatusChange:)
+       name:@"VPNStatusChanged"
+       object:nil];
+    [self startMonitoringTunnelStatus];
     [self fetchSubscriptionAsync];
     [self setUI];
  
@@ -42,6 +49,34 @@
   
 
 }
+- (void)handleVPNStatusChange:(NSNotification *)notification {
+    VPNStatus status = [notification.userInfo[@"status"] integerValue];
+    [self updateConnectionStatus:status];
+}
+- (void)updateConnectionStatus:(VPNStatus)status {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        switch (status) {
+            case VPNStatusConnecting:
+                [MBProgressHUD showMessage:@"连接中..."];
+                break;
+            case VPNStatusConnected:
+                [MBProgressHUD showMessage:@"已连接"];
+                break;
+            case VPNStatusDisconnecting:
+                [MBProgressHUD showMessage:@"断开中..."];
+                break;
+            case VPNStatusDisconnected:
+                [MBProgressHUD showMessage:@"已断开"];
+                break;
+            case VPNStatusReasserting:
+                [MBProgressHUD showMessage:@"重新连接中..."];
+                break;
+            default:
+                [MBProgressHUD showMessage:@"未知状态"];
+        }
+    });
+}
+
 - (void)setUI{
     
 //    UIButton * startVpnBtn = [[UIButton alloc]init];
@@ -108,12 +143,15 @@
     NSString *encryption = model.cipher; // 从订阅数据中获取
     NSLog(@"model.server:%@\n port:%ld\n password:%@\n encryption: %@ \n %ld",serverAddress,model.port,password,encryption,model.type);
     // 检查协议类型
-      if (model.type != ClashProxyTypeTrojan &&
-          model.type != ClashProxyTypeSS) {
-          NSLog(@"不支持的协议类型: %ld", model.type);
-          return;
-      }
-    NSString * protocol = model.type == ClashProxyTypeTrojan?@"trogan":@"ss";
+    NSString *protocol;
+    if (model.type == ClashProxyTypeTrojan) {
+        protocol = @"trojan";
+    } else if (model.type == ClashProxyTypeSS) {
+        protocol = @"shadowsocks";  // 使用完整标识符
+    } else {
+        NSLog(@"不支持的协议类型: %ld", model.type);
+        return;
+    }
     // 调用VPN管理器
        [[VPNManager shared] startVPNWithServer:serverAddress
                                          port:port
@@ -212,6 +250,47 @@
         
         [MBProgressHUD showMessage:statusText];
     });
+}
+- (void)startMonitoringTunnelStatus {
+    [NSTimer scheduledTimerWithTimeInterval:5.0
+                                    target:self
+                                  selector:@selector(queryTunnelStatus)
+                                  userInfo:nil
+                                   repeats:YES];
+}
+
+- (void)queryTunnelStatus {
+    VPNConfigManager *configManager = [VPNConfigManager shared];
+    
+    // 检查 tunnelManager 是否存在
+    if (!configManager.tunnelManager) {
+        NSLog(@"tunnelManager 尚未初始化");
+        return;
+    }
+    
+    // 检查连接状态
+    if (configManager.tunnelManager.connection.status != NEVPNStatusConnected) {
+        NSLog(@"VPN 未连接");
+        return;
+    }
+    
+    // 安全转换
+    if (![configManager.tunnelManager.connection isKindOfClass:[NETunnelProviderSession class]]) {
+        NSLog(@"连接类型不是 NETunnelProviderSession");
+        return;
+    }
+    
+    NETunnelProviderSession *session = (NETunnelProviderSession *)configManager.tunnelManager.connection;
+    
+    NSData *message = [@"status" dataUsingEncoding:NSUTF8StringEncoding];
+    [session sendProviderMessage:message returnError:nil responseHandler:^(NSData *responseData) {
+        if (responseData) {
+            NSString *response = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
+            NSLog(@"[Tunnel] 状态响应: %@", response);
+        } else {
+            NSLog(@"[Tunnel] 未收到响应");
+        }
+    }];
 }
 // 开始链接
 - (void)startConnect{

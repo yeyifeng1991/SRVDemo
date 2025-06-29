@@ -26,12 +26,21 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        // 添加状态监听
         [[VPNConfigManager shared] addStatusObserverWithCompletion:^(NSInteger status) {
+            VPNStatus vpnStatus = (VPNStatus)status;
+            
+            // 记录详细状态
+            NSLog(@"[VPN] 状态变更: %ld", (long)vpnStatus);
+            
             if (self.statusHandler) {
-                self.statusHandler((VPNStatus)status);
+                self.statusHandler(vpnStatus);
             }
             
+            // 将状态传递到 ViewController
+            [[NSNotificationCenter defaultCenter]
+                postNotificationName:@"VPNStatusChanged"
+                object:nil
+                userInfo:@{@"status": @(vpnStatus)}];
         }];
     }
     return self;
@@ -80,9 +89,9 @@
             }
             
             if (error) {
-                NSLog(@"[VPN] 启动失败: %@", error.localizedDescription);
+                NSLog(@"[VPNManager] 启动失败: %@", error.localizedDescription);
             } else {
-                NSLog(@"[VPN] 启动成功");
+                NSLog(@"[VPNManager] 启动命令已成功发送到系统");
             }
             completion(error);
         }
@@ -102,4 +111,8 @@
     self.statusHandler = statusHandler;
 }
 
+// 新增清理方法
+- (void)dealloc {
+    [NSNotificationCenter.defaultCenter removeObserver:self];
+}
 @end
