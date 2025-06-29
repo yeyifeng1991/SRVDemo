@@ -1,18 +1,18 @@
-# Uncomment the next line to define a global platform for your project
- platform :ios, '12.0'
-# 全局使用静态框架
+platform :ios, '12.0'
 use_frameworks! :linkage => :static
 
+# 添加 Shadowsocks 的私有仓库源（如果需要）
+# source 'https://github.com/shadowsocks/Specs.git'
+
 def shared_pods
-  # 共享的依赖
   pod 'CocoaAsyncSocket', '~> 7.6.5'
   pod 'CryptoSwift', '~> 1.5.1'
-  pod 'NEKit', :modular_headers => true
 end
 
 target 'SRVDemo' do
   shared_pods
-
+  pod 'NEKit', :modular_headers => true
+  
   pod 'AFNetworking'
   pod 'IQKeyboardManager'
   pod 'SDWebImage'
@@ -23,32 +23,38 @@ target 'SRVDemo' do
 end
 
 target 'PacketTunnel' do
-  # 只调用一次共享依赖
   shared_pods
-  
-  # 不再重复声明 NEKit
-  
-  # 通过 post_install 配置 BITCODE
+  # 直接从 GitHub 安装 Shadowsocks
+  pod 'Shadowsocks-iOS', :git => 'https://github.com/shadowsocks/shadowsocks-iOS.git', :tag => '2.6.3'
 end
 
-# 添加配置钩子处理特殊设置
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
-      # 为所有 target 禁用 BITCODE
       config.build_settings['ENABLE_BITCODE'] = 'NO'
+      
+      # 为必要的库启用模块化支持
+      if ['NEKit', 'Shadowsocks-iOS', 'CocoaAsyncSocket'].include?(target.name)
+        config.build_settings['DEFINES_MODULE'] = 'YES'
+      end
     end
   end
   
-  # 单独为 PacktTunnel target 配置
   installer.generated_projects.each do |project|
     project.targets.each do |target|
-      if target.name == 'PacktTunnel'
+      if target.name == 'PacketTunnel'
         target.build_configurations.each do |config|
-          # 添加网络扩展专用配置
           config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
           config.build_settings['STRIP_INSTALLED_PRODUCT'] = 'YES'
           config.build_settings['OTHER_LDFLAGS'] = '$(inherited) -framework "NetworkExtension"'
+          
+          # Shadowsocks 必需的预处理器定义
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'SS_LOCAL=1'
+          
+          # 确保包含正确的头文件搜索路径
+          config.build_settings['HEADER_SEARCH_PATHS'] ||= '$(inherited)'
+          config.build_settings['HEADER_SEARCH_PATHS'] << '"${PODS_ROOT}/Shadowsocks-iOS/Shadowsocks_iOS"'
         end
       end
     end

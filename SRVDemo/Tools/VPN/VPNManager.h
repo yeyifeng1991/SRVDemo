@@ -9,6 +9,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+
 typedef NS_ENUM(NSInteger, VPNStatus) {
     VPNStatusInvalid = 0,
     VPNStatusDisconnected = 1,
@@ -17,7 +18,17 @@ typedef NS_ENUM(NSInteger, VPNStatus) {
     VPNStatusReasserting = 4,
     VPNStatusDisconnecting = 5
 };
+typedef NS_ENUM(NSInteger, VPNDisconnectReason) {
+    VPNDisconnectReasonUnknown = 0,
+    VPNDisconnectReasonUserInitiated,
+    VPNDisconnectReasonConnectionFailed,
+    VPNDisconnectReasonIdleTimeout,
+    VPNDisconnectReasonConfigurationError
+};
+
 @interface VPNManager : NSObject
+@property (nonatomic, assign) VPNDisconnectReason disconnectReason;
+
 + (instancetype)shared;
 
 - (void)startVPNWithServer:(NSString *)server

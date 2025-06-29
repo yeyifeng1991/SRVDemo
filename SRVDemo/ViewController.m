@@ -37,22 +37,16 @@
     // 添加VPN状态监听
    [[NSNotificationCenter defaultCenter]
        addObserver:self
-       selector:@selector(handleVPNStatusChange:)
+       selector:@selector(handleVPNDisconnect:)
        name:@"VPNStatusChanged"
        object:nil];
     [self startMonitoringTunnelStatus];
     [self fetchSubscriptionAsync];
     [self setUI];
  
-    // 创建 Shadowsocks 配置
-//    NEKitProxyWrapper *proxyWrapper = [[NEKitProxyWrapper alloc] init];
-  
 
 }
-- (void)handleVPNStatusChange:(NSNotification *)notification {
-    VPNStatus status = [notification.userInfo[@"status"] integerValue];
-    [self updateConnectionStatus:status];
-}
+
 - (void)updateConnectionStatus:(VPNStatus)status {
     dispatch_async(dispatch_get_main_queue(), ^{
         switch (status) {
@@ -222,7 +216,70 @@
     }
     return vc;
 }
-
+- (void)handleVPNDisconnect:(NSNotification *)notification {
+    VPNDisconnectReason reason = [notification.userInfo[@"reason"] integerValue];
+    [self analyzeDisconnectReason:reason];
+}
+- (void)analyzeDisconnectReason:(VPNDisconnectReason)reason {
+    NSString *reasonText = @"";
+    
+    switch (reason) {
+        case VPNDisconnectReasonUserInitiated:
+            reasonText = @"用户主动断开";
+            break;
+        case VPNDisconnectReasonConnectionFailed:
+            reasonText = @"连接失败";
+            break;
+        case VPNDisconnectReasonIdleTimeout:
+            reasonText = @"空闲超时";
+            break;
+        case VPNDisconnectReasonConfigurationError:
+            reasonText = @"配置错误";
+            break;
+        default:
+            reasonText = @"未知原因";
+    }
+    
+    NSLog(@"[VPN] 断开原因分析: %@", reasonText);
+    
+    // 显示断开原因给用户
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [MBProgressHUD showMessage:[NSString stringWithFormat:@"连接断开: %@", reasonText]];
+    });
+    
+    // 如果是非用户主动断开，尝试自动重连
+    if (reason != VPNDisconnectReasonUserInitiated) {
+        NSLog(@"[VPN] 尝试自动重新连接");
+        [self reconnectVPN];
+    }
+}
+- (void)reconnectVPN {
+    // 获取当前选择的服务器配置
+    NSIndexPath *selectedIndexPath = [self.tableView indexPathForSelectedRow];
+    if (!selectedIndexPath) return;
+    
+    ClashProxyModel *model = self.proxyArray[selectedIndexPath.row];
+    
+    // 延迟 2 秒后重连
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        NSLog(@"[VPN] 执行自动重连");
+        
+        NSString *protocol = model.type == ClashProxyTypeTrojan ? @"trojan" : @"shadowsocks";
+        
+        [[VPNManager shared] startVPNWithServer:model.server
+                                          port:model.port
+                                  protocolType:protocol
+                                      password:model.password
+                                        method:model.cipher
+                                    completion:^(NSError * _Nullable error) {
+            if (error) {
+                NSLog(@"[VPN] 自动重连失败: %@", error.localizedDescription);
+            } else {
+                NSLog(@"[VPN] 自动重连成功");
+            }
+        }];
+    });
+}
 - (void)updateConnectionUI {
     // 更新UI显示连接状态
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -251,8 +308,10 @@
         [MBProgressHUD showMessage:statusText];
     });
 }
+// 修改状态监控方法
 - (void)startMonitoringTunnelStatus {
-    [NSTimer scheduledTimerWithTimeInterval:5.0
+    // 降低查询频率到10秒
+    [NSTimer scheduledTimerWithTimeInterval:10.0
                                     target:self
                                   selector:@selector(queryTunnelStatus)
                                   userInfo:nil
@@ -262,35 +321,60 @@
 - (void)queryTunnelStatus {
     VPNConfigManager *configManager = [VPNConfigManager shared];
     
-    // 检查 tunnelManager 是否存在
     if (!configManager.tunnelManager) {
-        NSLog(@"tunnelManager 尚未初始化");
         return;
     }
     
-    // 检查连接状态
-    if (configManager.tunnelManager.connection.status != NEVPNStatusConnected) {
-        NSLog(@"VPN 未连接");
+    NEVPNStatus status = configManager.tunnelManager.connection.status;
+    
+    // 只在已连接状态查询
+    if (status != NEVPNStatusConnected) {
         return;
     }
     
-    // 安全转换
     if (![configManager.tunnelManager.connection isKindOfClass:[NETunnelProviderSession class]]) {
-        NSLog(@"连接类型不是 NETunnelProviderSession");
         return;
     }
     
     NETunnelProviderSession *session = (NETunnelProviderSession *)configManager.tunnelManager.connection;
     
+    // 发送心跳消息
     NSData *message = [@"status" dataUsingEncoding:NSUTF8StringEncoding];
     [session sendProviderMessage:message returnError:nil responseHandler:^(NSData *responseData) {
         if (responseData) {
             NSString *response = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
             NSLog(@"[Tunnel] 状态响应: %@", response);
-        } else {
-            NSLog(@"[Tunnel] 未收到响应");
+            
+            // 处理隧道无响应的情况
+            if (![response containsString:@"ProxyRunning: true"]) {
+                NSLog(@"[警告] 隧道代理未运行");
+            }
         }
     }];
+}
+
+
+// 添加断开原因分析
+- (void)analyzeDisconnectReason {
+    VPNConfigManager *configManager = [VPNConfigManager shared];
+    
+    if (!configManager.tunnelManager) {
+        NSLog(@"⚠️ 断开原因: tunnelManager未初始化");
+        return;
+    }
+    
+    NEVPNConnection *connection = configManager.tunnelManager.connection;
+    
+    if (connection.status == NEVPNStatusInvalid) {
+        NSLog(@"⚠️ 断开原因: 无效连接状态");
+    }
+    
+    if (connection.connectedDate == nil) {
+        NSLog(@"⚠️ 断开原因: 从未成功连接");
+    } else {
+        NSTimeInterval duration = [[NSDate date] timeIntervalSinceDate:connection.connectedDate];
+        NSLog(@"⚠️ 断开原因: 连接持续了 %.2f 秒后断开", duration);
+    }
 }
 // 开始链接
 - (void)startConnect{

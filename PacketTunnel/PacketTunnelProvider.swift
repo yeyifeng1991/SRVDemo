@@ -6,6 +6,9 @@
 //
 import NetworkExtension
 import os.log
+//startShadowsocksProxy 方法中，"实际代理启动代码" 是指您需要集成 Shadowsocks 库（如 Shadowsocks-iOS）
+//private var shadowsocksClient: ShadowsocksClient? // 添加代理客户端引用
+private var isReadingPackets = false // 添加读取状态标志
 
 class PacketTunnelProvider: NEPacketTunnelProvider {
     // MARK: - 日志系统
@@ -43,7 +46,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         let method = providerConfig["method"] as? String
         logConfig(server: server, port: port, protocolType: protocolType, method: method)
         
-        // 3. 设置网络配置
+        // 3. 设置网络配置 - 关键修复点：不在此处调用completionHandler
         let settings = createNetworkSettings()
         setTunnelNetworkSettings(settings) { [weak self] error in
             guard let self = self else { return }
@@ -56,22 +59,52 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             
             self.logInfo("✅ 网络设置完成")
             
-            // 4. 启动代理服务器
+            // 4. 启动代理服务器 - 关键修复点：延迟调用completionHandler
             self.startProxyServer(
                 server: server,
                 port: port,
                 protocolType: protocolType,
                 password: password,
-                method: method,
-                completion: completionHandler
-            )
+                method: method
+            ) { error in
+                // 关键：在代理完全启动后再调用完成处理程序
+                if let error = error {
+                    self.logError("❌ 启动代理失败: \(error.localizedDescription)")
+                    completionHandler(error)
+                } else {
+                    self.logInfo("🚀 隧道完全就绪")
+                    
+                    // 关键修复：启动数据包处理循环
+                    self.startReadingPackets()
+                    
+                    // 关键：延迟500ms确保隧道稳定
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        completionHandler(nil)
+                        self.logInfo("✅ 调用完成处理程序")
+                    }
+                }
+            }
         }
     }
     
     override func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
         logStopTunnel(reason: reason)
-        stopProxyServer()
-        completionHandler()
+          
+          // 1. 停止代理服务
+          stopProxyServer()
+          
+          // 2. 停止数据包读取循环
+          proxyRunning = false
+          
+          // 3. 停止 Shadowsocks 客户端
+//          shadowsocksClient?.stop()
+//          shadowsocksClient = nil
+          
+          // 4. 延迟确保资源释放
+          DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {
+              self.logInfo("🛑 隧道已完全停止")
+              completionHandler()
+          }
     }
     
     // MARK: - 代理服务器管理
@@ -126,19 +159,17 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         completion: @escaping (Error?) -> Void
     ) {
         let encryption = method ?? "aes-256-gcm"
-        logInfo("🔐 使用 Shadowsocks (\(encryption))")
-        
-        do {
-            // 实际启动 Shadowsocks 代理的代码
-            // 这里应该有 Shadowsocks 库的初始化
-            logInfo("✅ Shadowsocks 代理已启动")
-            proxyRunning = true
-            startReadingPackets()
-            completion(nil)
-        } catch {
-            logError("❌ 启动 Shadowsocks 失败: \(error.localizedDescription)")
-            completion(error)
-        }
+       logInfo("🔐 使用 Shadowsocks (\(encryption))")
+       
+       // 移除 startReadingPackets() 调用
+       // 实际代理启动代码...
+       logInfo("✅ Shadowsocks 代理已启动")
+       proxyRunning = true
+       
+       // 模拟代理启动成功
+       DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {
+           completion(nil)
+       }
     }
     
     private func startTrojanProxy(
@@ -164,42 +195,73 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     
     // MARK: - 数据包处理 (使用 NEPacketTunnelFlow)
     private func startReadingPackets() {
-        logInfo("📦 开始读取数据包")
+        guard !isReadingPackets else {
+            logInfo("📦 数据包读取已启动")
+            return
+        }
         
-        // 使用新的数据包处理API
-        packetFlow.readPackets { [weak self] (packets, protocols) in
-            guard let self = self, self.proxyRunning else { return }
-            
-            self.logDebug("📥 收到 \(packets.count) 个数据包")
-            
-            // 处理数据包
-            for (index, packet) in packets.enumerated() {
-                let protocolFamily = protocols[index].intValue
-                self.handlePacket(packet, protocolFamily: protocolFamily)
+        logInfo("📦 开始读取数据包")
+        isReadingPackets = true
+        proxyRunning = true
+        
+        // 使用递归函数保持循环
+        func readPackets() {
+            // 确保隧道仍在运行
+            guard proxyRunning else {
+                logInfo("📦 停止读取数据包（隧道已停止）")
+                isReadingPackets = false
+                return
             }
             
-            // 继续读取下一个数据包
-            self.startReadingPackets()
+            packetFlow.readPackets { [weak self] (packets, protocols) in
+                guard let self = self else { return }
+                
+                self.logDebug("📥 收到 \(packets.count) 个数据包")
+                
+                // 处理数据包
+                for (index, packet) in packets.enumerated() {
+                    let protocolFamily = protocols[index].intValue
+                    self.handlePacket(packet, protocolFamily: protocolFamily)
+                }
+                
+                // 继续读取下一个数据包
+                readPackets()
+            }
         }
+        
+        // 启动读取循环
+        readPackets()
     }
     
     private func handlePacket(_ packet: Data, protocolFamily: Int) {
-        // 这里应该有实际的数据包处理逻辑
-        // 将数据包发送到代理服务器进行处理
-        
-        logDebug("📦 处理数据包 (\(packet.count) 字节), 协议族: \(protocolFamily)")
-        
-        // 模拟处理后的数据包（实际应该由代理处理）
-        let processedPacket = packet // 实际应用中这里应该是处理后的数据
-        
-        // 将处理后的数据包写回
-        writePacket(processedPacket, protocolFamily: protocolFamily)
+        // 1. 检查代理是否运行
+//           guard proxyRunning, let client = shadowsocksClient else {
+//               logDebug("📦 收到数据包但代理未运行")
+//               return
+//           }
+//           
+//           // 2. 记录数据包信息
+//           logDebug("📦 处理数据包 (\(packet.count) 字节), 协议族: \(protocolFamily)")
+//           
+//           // 3. 将数据包发送到代理服务器
+//           do {
+//               try client.write(packet)
+//               logDebug("📤 已发送数据包到代理服务器")
+//           } catch {
+//               logError("❌ 发送数据包失败: \(error.localizedDescription)")
+//               
+//               // 如果是严重错误，停止隧道
+//               if let nsError = error as NSError?,
+//                  nsError.domain == "ShadowsocksErrorDomain" && nsError.code == 100 {
+//                   cancelTunnelWithError(error)
+//               }
+//           }
     }
     
     private func writePacket(_ packet: Data, protocolFamily: Int) {
         let protocols = [NSNumber(value: protocolFamily)]
-        packetFlow.writePackets([packet], withProtocols: protocols)
-        logDebug("📤 发送数据包 (\(packet.count) 字节)")
+         packetFlow.writePackets([packet], withProtocols: protocols)
+         logDebug("📤 发送数据包 (\(packet.count) 字节)")
     }
     
     // MARK: - 网络设置

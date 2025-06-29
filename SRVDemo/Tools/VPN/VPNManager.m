@@ -100,9 +100,35 @@
 
 - (void)stopVPNWithCompletion:(void (^)(NSError * _Nullable))completion {
     NSLog(@"[VPN] 停止连接");
+    self.disconnectReason = VPNDisconnectReasonUserInitiated;
     [[VPNConfigManager shared] stopVPNWithCompletion:completion];
 }
 
+- (void)handleVPNStatusChange:(NSNotification *)notification {
+    VPNStatus status = (VPNStatus)[notification.userInfo[@"status"] integerValue];
+    
+    // 记录状态转换
+    NSLog(@"[VPN] 状态变更: %ld", (long)status);
+    
+    // 处理断开情况
+    if (status == VPNStatusDisconnected) {
+        NSLog(@"[VPN] 连接已断开，原因: %ld", (long)self.disconnectReason);
+        
+        // 重置断开原因
+        VPNDisconnectReason reason = self.disconnectReason;
+        self.disconnectReason = VPNDisconnectReasonUnknown;
+        
+        // 将断开原因传递到 ViewController
+        [[NSNotificationCenter defaultCenter]
+            postNotificationName:@"VPNDisconnected"
+            object:nil
+            userInfo:@{@"reason": @(reason)}];
+    }
+    
+    if (self.statusHandler) {
+        self.statusHandler(status);
+    }
+}
 - (VPNStatus)currentStatus {
     return (VPNStatus)[[VPNConfigManager shared] getVPNStatus];
 }
