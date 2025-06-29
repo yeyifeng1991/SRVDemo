@@ -13,6 +13,9 @@
 #import <NEKit/NEKit-Swift.h>
 #import "SRVDemo-Swift.h"
 #import "SRVpnTableCell.h"
+#import "VPNManager.h"
+#import "MBProgressHUD+TK_WeRecord.h"
+
 
 @interface ViewController ()<UITableViewDelegate,UITableViewDataSource>
 @property (nonatomic,strong) UITableView  * tableView ;
@@ -103,32 +106,112 @@
     UInt16 port = model.port; // 从订阅数据中获取
     NSString *password = model.password; // 从订阅数据中获取
     NSString *encryption = model.cipher; // 从订阅数据中获取
-    NSLog(@"model.server:%@\n port:%ld\n password:%@\n encryption: %@",serverAddress,model.port,password,encryption);
-    // 设置 Shadowsocks 代理
-    // 尝试多次启动
-    for (int i = 0; i < 3; i++) {
-        [self.proxyWrapper setupShadowSocksProxyWithServerAddress:serverAddress
-                                                            port:port
-                                                        password:password
-                                                      encryption:encryption];
-        
-        NSError *error = nil;
-        [self.proxyWrapper startProxyAndReturnError:&error];
-        
-        if (!error) {
-            NSLog(@"✅ VPN 成功启动 (尝试 %d)", i+1);
-            model.connectType = ClashConnectSuccess;
-            break;
-        }
-        
-        NSLog(@"⚠️ 启动失败 (尝试 %d): %@", i+1, error.localizedDescription);
-        [NSThread sleepForTimeInterval:0.5]; // 等待0.5秒后重试
-    }
+    NSLog(@"model.server:%@\n port:%ld\n password:%@\n encryption: %@ \n %ld",serverAddress,model.port,password,encryption,model.type);
+    // 检查协议类型
+      if (model.type != ClashProxyTypeTrojan &&
+          model.type != ClashProxyTypeSS) {
+          NSLog(@"不支持的协议类型: %ld", model.type);
+          return;
+      }
+    NSString * protocol = model.type == ClashProxyTypeTrojan?@"trogan":@"ss";
+    // 调用VPN管理器
+       [[VPNManager shared] startVPNWithServer:serverAddress
+                                         port:port
+                                 protocolType:protocol
+                                     password:password
+                                       method:encryption
+                                   completion:^(NSError * _Nullable error) {
+           if (error) {
+               NSLog(@"VPN启动失败: %@", error.localizedDescription);
+               // 显示错误提示
+               [self showErrorAlert:error.localizedDescription];
+           } else {
+               NSLog(@"VPN启动成功");
+               // 更新UI显示连接状态
+               [self updateConnectionUI];
+           }
+       }];
+    /**
+     旧逻辑
+     // 尝试多次启动
+     for (int i = 0; i < 3; i++) {
+         [self.proxyWrapper setupShadowSocksProxyWithServerAddress:serverAddress
+                                                             port:port
+                                                         password:password
+                                                       encryption:encryption];
+         
+         NSError *error = nil;
+         [self.proxyWrapper startProxyAndReturnError:&error];
+         
+         if (!error) {
+             NSLog(@"✅ VPN 成功启动 (尝试 %d)", i+1);
+             model.connectType = ClashConnectSuccess;
+             break;
+         }
+         
+         NSLog(@"⚠️ 启动失败 (尝试 %d): %@", i+1, error.localizedDescription);
+         [NSThread sleepForTimeInterval:0.5]; // 等待0.5秒后重试
+     }
 
-    if (model.connectType != ClashConnectSuccess) {
-        NSLog(@"❌ VPN 启动失败");
-        model.connectType = ClashConnectFail;
+     if (model.connectType != ClashConnectSuccess) {
+         NSLog(@"❌ VPN 启动失败");
+         model.connectType = ClashConnectFail;
+     }
+     
+     */
+    
+}
+- (void)showErrorAlert:(NSString *)message {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"VPN错误"
+                                                                       message:message
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"确定"
+                                                  style:UIAlertActionStyleDefault
+                                                handler:nil]];
+        
+        // 获取当前视图控制器并显示弹窗
+        UIViewController *topVC = [self topViewController];
+        [topVC presentViewController:alert animated:YES completion:nil];
+    });
+}
+
+- (UIViewController *)topViewController {
+    UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
+    UIViewController *vc = keyWindow.rootViewController;
+    while (vc.presentedViewController) {
+        vc = vc.presentedViewController;
     }
+    return vc;
+}
+
+- (void)updateConnectionUI {
+    // 更新UI显示连接状态
+    dispatch_async(dispatch_get_main_queue(), ^{
+        VPNStatus status = [[VPNManager shared] currentStatus];
+        NSString *statusText = @"";
+        
+        switch (status) {
+            case VPNStatusConnecting:
+                statusText = @"连接中...";
+                break;
+            case VPNStatusConnected:
+                statusText = @"已连接";
+                break;
+            case VPNStatusDisconnecting:
+                statusText = @"断开中...";
+                break;
+            case VPNStatusDisconnected:
+                statusText = @"已断开";
+                break;
+            default:
+                statusText = @"未知状态";
+                break;
+        }
+        NSLog(@"%@",statusText);
+        
+        [MBProgressHUD showMessage:statusText];
+    });
 }
 // 开始链接
 - (void)startConnect{

@@ -45,7 +45,7 @@ import NetworkExtension
             
             // 1. 配置协议
             let protocolConfig = NETunnelProviderProtocol()
-            protocolConfig.providerBundleIdentifier = "com.yourcompany.PacktTunnel" // 替换为你的扩展bundle ID
+            protocolConfig.providerBundleIdentifier = "com.talkcloud.name.SRVDemo.PacketTunnel" // 替换为你的扩展bundle ID
             protocolConfig.serverAddress = server
             
             // 2. 添加自定义配置
@@ -93,7 +93,7 @@ import NetworkExtension
     }
     
     // 停止VPN
-    @objc func stopVPN(completion: @escaping (Error?) -> Void) {
+    @objc public func stopVPN(completion: @escaping (Error?) -> Void) {
         tunnelManager?.connection.stopVPNTunnel()
         completion(nil)
     }
