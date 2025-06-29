@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1238575B174D52B08F2B0D9B /* Pods_SRVDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E7AC7C60773D948DCF17E7C /* Pods_SRVDemo.framework */; };
+		6257657C18824515DD54A4CE /* Pods_SRVDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 757695E3F41F600F853DE1BF /* Pods_SRVDemo.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		537BE38B80CDC419CA194285 /* Pods-SRVDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SRVDemo.release.xcconfig"; path = "Target Support Files/Pods-SRVDemo/Pods-SRVDemo.release.xcconfig"; sourceTree = "<group>"; };
-		626D13876D36384691B148AE /* Pods-SRVDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SRVDemo.debug.xcconfig"; path = "Target Support Files/Pods-SRVDemo/Pods-SRVDemo.debug.xcconfig"; sourceTree = "<group>"; };
-		9E7AC7C60773D948DCF17E7C /* Pods_SRVDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SRVDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		61F6F321754D6C2A9B1BD0C3 /* Pods-SRVDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SRVDemo.release.xcconfig"; path = "Target Support Files/Pods-SRVDemo/Pods-SRVDemo.release.xcconfig"; sourceTree = "<group>"; };
+		757695E3F41F600F853DE1BF /* Pods_SRVDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SRVDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		889DF8969CAD1FAAA3B09FD1 /* Pods-SRVDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SRVDemo.debug.xcconfig"; path = "Target Support Files/Pods-SRVDemo/Pods-SRVDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		EF8D8B242E003F7C0006F0CD /* SRVDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SRVDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -43,17 +43,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1238575B174D52B08F2B0D9B /* Pods_SRVDemo.framework in Frameworks */,
+				6257657C18824515DD54A4CE /* Pods_SRVDemo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		7C7D80D05D8E246E424B6081 /* Frameworks */ = {
+		5239B7CF162DD9A21CB340DC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				9E7AC7C60773D948DCF17E7C /* Pods_SRVDemo.framework */,
+				757695E3F41F600F853DE1BF /* Pods_SRVDemo.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -61,8 +61,8 @@
 		AC39535745D713D1FAC8DBE7 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				626D13876D36384691B148AE /* Pods-SRVDemo.debug.xcconfig */,
-				537BE38B80CDC419CA194285 /* Pods-SRVDemo.release.xcconfig */,
+				889DF8969CAD1FAAA3B09FD1 /* Pods-SRVDemo.debug.xcconfig */,
+				61F6F321754D6C2A9B1BD0C3 /* Pods-SRVDemo.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -73,7 +73,7 @@
 				EF8D8B262E003F7C0006F0CD /* SRVDemo */,
 				EF8D8B252E003F7C0006F0CD /* Products */,
 				AC39535745D713D1FAC8DBE7 /* Pods */,
-				7C7D80D05D8E246E424B6081 /* Frameworks */,
+				5239B7CF162DD9A21CB340DC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -92,11 +92,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = EF8D8B3C2E003F7E0006F0CD /* Build configuration list for PBXNativeTarget "SRVDemo" */;
 			buildPhases = (
-				ADFD9AAA3D85CF1FF853277A /* [CP] Check Pods Manifest.lock */,
+				FA887BA4AFB70E7CE8E1C295 /* [CP] Check Pods Manifest.lock */,
 				EF8D8B202E003F7C0006F0CD /* Sources */,
 				EF8D8B212E003F7C0006F0CD /* Frameworks */,
 				EF8D8B222E003F7C0006F0CD /* Resources */,
-				91AF4789E62F46B73AEA6C6F /* [CP] Embed Pods Frameworks */,
+				1065532196EF3DB8DA03DF5A /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -156,7 +156,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		91AF4789E62F46B73AEA6C6F /* [CP] Embed Pods Frameworks */ = {
+		1065532196EF3DB8DA03DF5A /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -164,20 +164,16 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SRVDemo/Pods-SRVDemo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SRVDemo/Pods-SRVDemo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SRVDemo/Pods-SRVDemo-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		ADFD9AAA3D85CF1FF853277A /* [CP] Check Pods Manifest.lock */ = {
+		FA887BA4AFB70E7CE8E1C295 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -214,7 +210,7 @@
 /* Begin XCBuildConfiguration section */
 		EF8D8B3D2E003F7E0006F0CD /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 626D13876D36384691B148AE /* Pods-SRVDemo.debug.xcconfig */;
+			baseConfigurationReference = 889DF8969CAD1FAAA3B09FD1 /* Pods-SRVDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -253,7 +249,7 @@
 		};
 		EF8D8B3E2E003F7E0006F0CD /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 537BE38B80CDC419CA194285 /* Pods-SRVDemo.release.xcconfig */;
+			baseConfigurationReference = 61F6F321754D6C2A9B1BD0C3 /* Pods-SRVDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
