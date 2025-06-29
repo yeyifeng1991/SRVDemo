@@ -208,7 +208,7 @@
                 statusText = @"未知状态";
                 break;
         }
-        NSLog(@"%@",statusText);
+        NSLog(@"[VPN]%@",statusText);
         
         [MBProgressHUD showMessage:statusText];
     });
