@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6257657C18824515DD54A4CE /* Pods_SRVDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 757695E3F41F600F853DE1BF /* Pods_SRVDemo.framework */; };
+		8BA247FE9E523732F0E6CFA1 /* Pods_PacketTunnel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C50BA41558C9D07BC360DCAA /* Pods_PacketTunnel.framework */; };
 		EFA7FBF12E10D55A0017DBD9 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA7FBF02E10D55A0017DBD9 /* NetworkExtension.framework */; };
 		EFA7FBF92E10D55A0017DBD9 /* PacketTunnel.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EFA7FBEF2E10D55A0017DBD9 /* PacketTunnel.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -37,9 +38,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		24E3430E268DFC74172719B1 /* Pods-PacketTunnel.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PacketTunnel.release.xcconfig"; path = "Target Support Files/Pods-PacketTunnel/Pods-PacketTunnel.release.xcconfig"; sourceTree = "<group>"; };
 		61F6F321754D6C2A9B1BD0C3 /* Pods-SRVDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SRVDemo.release.xcconfig"; path = "Target Support Files/Pods-SRVDemo/Pods-SRVDemo.release.xcconfig"; sourceTree = "<group>"; };
 		757695E3F41F600F853DE1BF /* Pods_SRVDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SRVDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		889DF8969CAD1FAAA3B09FD1 /* Pods-SRVDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SRVDemo.debug.xcconfig"; path = "Target Support Files/Pods-SRVDemo/Pods-SRVDemo.debug.xcconfig"; sourceTree = "<group>"; };
+		98269250F594D06785ADF2F1 /* Pods-PacketTunnel.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PacketTunnel.debug.xcconfig"; path = "Target Support Files/Pods-PacketTunnel/Pods-PacketTunnel.debug.xcconfig"; sourceTree = "<group>"; };
+		C50BA41558C9D07BC360DCAA /* Pods_PacketTunnel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PacketTunnel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EF8D8B242E003F7C0006F0CD /* SRVDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SRVDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFA7FBEF2E10D55A0017DBD9 /* PacketTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PacketTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFA7FBF02E10D55A0017DBD9 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
@@ -95,6 +99,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EFA7FBF12E10D55A0017DBD9 /* NetworkExtension.framework in Frameworks */,
+				8BA247FE9E523732F0E6CFA1 /* Pods_PacketTunnel.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -106,6 +111,7 @@
 			children = (
 				757695E3F41F600F853DE1BF /* Pods_SRVDemo.framework */,
 				EFA7FBF02E10D55A0017DBD9 /* NetworkExtension.framework */,
+				C50BA41558C9D07BC360DCAA /* Pods_PacketTunnel.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -115,6 +121,8 @@
 			children = (
 				889DF8969CAD1FAAA3B09FD1 /* Pods-SRVDemo.debug.xcconfig */,
 				61F6F321754D6C2A9B1BD0C3 /* Pods-SRVDemo.release.xcconfig */,
+				98269250F594D06785ADF2F1 /* Pods-PacketTunnel.debug.xcconfig */,
+				24E3430E268DFC74172719B1 /* Pods-PacketTunnel.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -170,6 +178,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = EFA7FBFA2E10D55A0017DBD9 /* Build configuration list for PBXNativeTarget "PacketTunnel" */;
 			buildPhases = (
+				030A651003EDC768E33282F0 /* [CP] Check Pods Manifest.lock */,
 				EFA7FBEB2E10D55A0017DBD9 /* Sources */,
 				EFA7FBEC2E10D55A0017DBD9 /* Frameworks */,
 				EFA7FBED2E10D55A0017DBD9 /* Resources */,
@@ -182,8 +191,6 @@
 				EFA7FBF22E10D55A0017DBD9 /* PacketTunnel */,
 			);
 			name = PacketTunnel;
-			packageProductDependencies = (
-			);
 			productName = PacketTunnel;
 			productReference = EFA7FBEF2E10D55A0017DBD9 /* PacketTunnel.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -246,6 +253,28 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		030A651003EDC768E33282F0 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-PacketTunnel-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		F4765B7B520C12400D600162 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -254,13 +283,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SRVDemo/Pods-SRVDemo-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SRVDemo/Pods-SRVDemo-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -514,6 +539,7 @@
 		};
 		EFA7FBFB2E10D55A0017DBD9 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 98269250F594D06785ADF2F1 /* Pods-PacketTunnel.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = PacketTunnel/PacketTunnel.entitlements;
 				CODE_SIGN_STYLE = Automatic;
@@ -542,6 +568,7 @@
 		};
 		EFA7FBFC2E10D55A0017DBD9 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 24E3430E268DFC74172719B1 /* Pods-PacketTunnel.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = PacketTunnel/PacketTunnel.entitlements;
 				CODE_SIGN_STYLE = Automatic;

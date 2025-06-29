@@ -20,11 +20,37 @@ target 'SRVDemo' do
   pod 'Masonry', '1.1.0'
   pod 'Bugly', '2.5.0'
   pod 'MJRefresh'
+end
 
+target 'PacketTunnel' do
+  # 只调用一次共享依赖
+  shared_pods
+  
+  # 不再重复声明 NEKit
+  
+  # 通过 post_install 配置 BITCODE
+end
 
-#pod 'NEKit', '~> 0.7.0'  # 请确认实际安装的版本
-
-
-  # Pods for SRVDemo
-
+# 添加配置钩子处理特殊设置
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      # 为所有 target 禁用 BITCODE
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+    end
+  end
+  
+  # 单独为 PacktTunnel target 配置
+  installer.generated_projects.each do |project|
+    project.targets.each do |target|
+      if target.name == 'PacktTunnel'
+        target.build_configurations.each do |config|
+          # 添加网络扩展专用配置
+          config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
+          config.build_settings['STRIP_INSTALLED_PRODUCT'] = 'YES'
+          config.build_settings['OTHER_LDFLAGS'] = '$(inherited) -framework "NetworkExtension"'
+        end
+      end
+    end
+  end
 end
