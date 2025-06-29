@@ -6,6 +6,7 @@
 //
 
 import NetworkExtension
+import NEKit
 
 class PacketTunnelProvider: NEPacketTunnelProvider {
 
