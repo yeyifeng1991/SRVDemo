@@ -8,13 +8,41 @@
 
 /* Begin PBXBuildFile section */
 		6257657C18824515DD54A4CE /* Pods_SRVDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 757695E3F41F600F853DE1BF /* Pods_SRVDemo.framework */; };
+		EFA7FBF12E10D55A0017DBD9 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA7FBF02E10D55A0017DBD9 /* NetworkExtension.framework */; };
+		EFA7FBF92E10D55A0017DBD9 /* PacketTunnel.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EFA7FBEF2E10D55A0017DBD9 /* PacketTunnel.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EFA7FBF72E10D55A0017DBD9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EF8D8B1C2E003F7B0006F0CD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EFA7FBEE2E10D55A0017DBD9;
+			remoteInfo = PacketTunnel;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		EFA7FBFE2E10D55A0017DBD9 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				EFA7FBF92E10D55A0017DBD9 /* PacketTunnel.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		61F6F321754D6C2A9B1BD0C3 /* Pods-SRVDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SRVDemo.release.xcconfig"; path = "Target Support Files/Pods-SRVDemo/Pods-SRVDemo.release.xcconfig"; sourceTree = "<group>"; };
 		757695E3F41F600F853DE1BF /* Pods_SRVDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SRVDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		889DF8969CAD1FAAA3B09FD1 /* Pods-SRVDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SRVDemo.debug.xcconfig"; path = "Target Support Files/Pods-SRVDemo/Pods-SRVDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		EF8D8B242E003F7C0006F0CD /* SRVDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SRVDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EFA7FBEF2E10D55A0017DBD9 /* PacketTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PacketTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		EFA7FBF02E10D55A0017DBD9 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -25,6 +53,13 @@
 			);
 			target = EF8D8B232E003F7C0006F0CD /* SRVDemo */;
 		};
+		EFA7FBFD2E10D55A0017DBD9 /* Exceptions for "PacketTunnel" folder in "PacketTunnel" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EFA7FBEE2E10D55A0017DBD9 /* PacketTunnel */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -34,6 +69,14 @@
 				EF8D8B3B2E003F7E0006F0CD /* Exceptions for "SRVDemo" folder in "SRVDemo" target */,
 			);
 			path = SRVDemo;
+			sourceTree = "<group>";
+		};
+		EFA7FBF22E10D55A0017DBD9 /* PacketTunnel */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EFA7FBFD2E10D55A0017DBD9 /* Exceptions for "PacketTunnel" folder in "PacketTunnel" target */,
+			);
+			path = PacketTunnel;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -47,6 +90,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EFA7FBEC2E10D55A0017DBD9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EFA7FBF12E10D55A0017DBD9 /* NetworkExtension.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -54,6 +105,7 @@
 			isa = PBXGroup;
 			children = (
 				757695E3F41F600F853DE1BF /* Pods_SRVDemo.framework */,
+				EFA7FBF02E10D55A0017DBD9 /* NetworkExtension.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -71,6 +123,7 @@
 			isa = PBXGroup;
 			children = (
 				EF8D8B262E003F7C0006F0CD /* SRVDemo */,
+				EFA7FBF22E10D55A0017DBD9 /* PacketTunnel */,
 				EF8D8B252E003F7C0006F0CD /* Products */,
 				AC39535745D713D1FAC8DBE7 /* Pods */,
 				5239B7CF162DD9A21CB340DC /* Frameworks */,
@@ -81,6 +134,7 @@
 			isa = PBXGroup;
 			children = (
 				EF8D8B242E003F7C0006F0CD /* SRVDemo.app */,
+				EFA7FBEF2E10D55A0017DBD9 /* PacketTunnel.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -96,11 +150,13 @@
 				EF8D8B202E003F7C0006F0CD /* Sources */,
 				EF8D8B212E003F7C0006F0CD /* Frameworks */,
 				EF8D8B222E003F7C0006F0CD /* Resources */,
-				1065532196EF3DB8DA03DF5A /* [CP] Embed Pods Frameworks */,
+				F4765B7B520C12400D600162 /* [CP] Copy Pods Resources */,
+				EFA7FBFE2E10D55A0017DBD9 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				EFA7FBF82E10D55A0017DBD9 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				EF8D8B262E003F7C0006F0CD /* SRVDemo */,
@@ -110,6 +166,28 @@
 			productReference = EF8D8B242E003F7C0006F0CD /* SRVDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
+		EFA7FBEE2E10D55A0017DBD9 /* PacketTunnel */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EFA7FBFA2E10D55A0017DBD9 /* Build configuration list for PBXNativeTarget "PacketTunnel" */;
+			buildPhases = (
+				EFA7FBEB2E10D55A0017DBD9 /* Sources */,
+				EFA7FBEC2E10D55A0017DBD9 /* Frameworks */,
+				EFA7FBED2E10D55A0017DBD9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EFA7FBF22E10D55A0017DBD9 /* PacketTunnel */,
+			);
+			name = PacketTunnel;
+			packageProductDependencies = (
+			);
+			productName = PacketTunnel;
+			productReference = EFA7FBEF2E10D55A0017DBD9 /* PacketTunnel.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -118,11 +196,15 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				CLASSPREFIX = SR;
+				LastSwiftUpdateCheck = 1630;
 				LastUpgradeCheck = 1630;
 				TargetAttributes = {
 					EF8D8B232E003F7C0006F0CD = {
 						CreatedOnToolsVersion = 16.3;
 						LastSwiftMigration = 1630;
+					};
+					EFA7FBEE2E10D55A0017DBD9 = {
+						CreatedOnToolsVersion = 16.3;
 					};
 				};
 			};
@@ -141,6 +223,7 @@
 			projectRoot = "";
 			targets = (
 				EF8D8B232E003F7C0006F0CD /* SRVDemo */,
+				EFA7FBEE2E10D55A0017DBD9 /* PacketTunnel */,
 			);
 		};
 /* End PBXProject section */
@@ -153,24 +236,35 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EFA7FBED2E10D55A0017DBD9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		1065532196EF3DB8DA03DF5A /* [CP] Embed Pods Frameworks */ = {
+		F4765B7B520C12400D600162 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SRVDemo/Pods-SRVDemo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-SRVDemo/Pods-SRVDemo-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SRVDemo/Pods-SRVDemo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-SRVDemo/Pods-SRVDemo-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SRVDemo/Pods-SRVDemo-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SRVDemo/Pods-SRVDemo-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		FA887BA4AFB70E7CE8E1C295 /* [CP] Check Pods Manifest.lock */ = {
@@ -205,7 +299,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EFA7FBEB2E10D55A0017DBD9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EFA7FBF82E10D55A0017DBD9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EFA7FBEE2E10D55A0017DBD9 /* PacketTunnel */;
+			targetProxy = EFA7FBF72E10D55A0017DBD9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		EF8D8B3D2E003F7E0006F0CD /* Debug */ = {
@@ -403,6 +512,61 @@
 			};
 			name = Release;
 		};
+		EFA7FBFB2E10D55A0017DBD9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PacketTunnel/PacketTunnel.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8VXJWE28Q2;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PacketTunnel/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PacketTunnel;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.talkcloud.name.SRVDemo.PacketTunnel;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EFA7FBFC2E10D55A0017DBD9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PacketTunnel/PacketTunnel.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8VXJWE28Q2;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PacketTunnel/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PacketTunnel;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.talkcloud.name.SRVDemo.PacketTunnel;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -420,6 +584,15 @@
 			buildConfigurations = (
 				EF8D8B3D2E003F7E0006F0CD /* Debug */,
 				EF8D8B3E2E003F7E0006F0CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EFA7FBFA2E10D55A0017DBD9 /* Build configuration list for PBXNativeTarget "PacketTunnel" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EFA7FBFB2E10D55A0017DBD9 /* Debug */,
+				EFA7FBFC2E10D55A0017DBD9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
