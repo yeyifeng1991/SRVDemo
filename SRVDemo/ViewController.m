@@ -10,7 +10,6 @@
 #import "ClashProxyModel.h"
 #import <NetworkExtension/NetworkExtension.h>
 #import <Masonry/Masonry.h>
-#import <NEKit/NEKit-Swift.h>
 #import "SRVDemo-Swift.h"
 #import "SRVpnTableCell.h"
 #import "VPNManager.h"
@@ -24,7 +23,6 @@
 @property (nonatomic,strong) UIButton  * disconnectVpnBtn ;
 
 
-@property (nonatomic, strong) NEKitProxyWrapper *proxyWrapper;
 @property (nonatomic,strong) NSArray <ClashProxyModel*> * proxyArray ;
 
 @end
@@ -128,7 +126,6 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     ClashProxyModel * model = self.proxyArray[indexPath.row];
-    self.proxyWrapper = [[NEKitProxyWrapper alloc] init];
     
     // 从订阅数据中提取 Shadowsocks 配置
     NSString *serverAddress = model.server; // 从订阅数据中获取
@@ -379,7 +376,6 @@
 // 开始链接
 - (void)startConnect{
     NSLog(@"xh开始链接");
-    [self startSSVPN];
     
 }
 
@@ -501,20 +497,5 @@
     [[NEVPNManager sharedManager].connection stopVPNTunnel];
 }
 
-- (void)startSSVPN {
-    NSError *error = nil;
-    [self.proxyWrapper startProxyAndReturnError:&error];
-    if (error) {
-        NSLog(@"启动 VPN 失败: %@", error.localizedDescription);
-    } else {
-        NSLog(@"VPN 已启动");
-    }
-}
-
-// 停止 VPN
-- (void)stopSSVPN:(id)sender {
-    [self.proxyWrapper stopProxy];
-    NSLog(@"VPN 已停止");
-}
 
 @end
