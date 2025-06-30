@@ -21,11 +21,15 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     private var proxyRunning = false
     private var proxyPort: UInt16 = 1080 // 默认代理端口
     
+    /**
+     系统层激活
+     系统调用 PacketTunnelProvider.startTunnel() 启动隧道核心功能
+     */
     // MARK: - 隧道生命周期
     override func startTunnel(options: [String : NSObject]?, completionHandler: @escaping (Error?) -> Void) {
         logStartTunnel(options: options)
         
-        // 1. 验证配置
+        // 1. 验证配置有效性
         guard let protocolConfig = self.protocolConfiguration as? NETunnelProviderProtocol,
               let providerConfig = protocolConfig.providerConfiguration else {
             logError("❌ 缺少必要的隧道配置")
@@ -33,7 +37,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             return
         }
         
-        // 2. 解析配置参数
+        // 2. 解析配置参数 （服务器/端口/协议/密码等）
         guard let server = providerConfig["server"] as? String,
               let port = providerConfig["port"] as? Int,
               let protocolType = providerConfig["protocol"] as? String,
@@ -46,7 +50,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         let method = providerConfig["method"] as? String
         logConfig(server: server, port: port, protocolType: protocolType, method: method)
         
-        // 3. 设置网络配置 - 关键修复点：不在此处调用completionHandler
+        // 3. 创建网络设置（IP/DNS/代理规则）
         let settings = createNetworkSettings()
         setTunnelNetworkSettings(settings) { [weak self] error in
             guard let self = self else { return }
@@ -59,7 +63,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             
             self.logInfo("✅ 网络设置完成")
             
-            // 4. 启动代理服务器 - 关键修复点：延迟调用completionHandler
+            // 4. 启动代理服务器 -设置网络配置后启动代理服务器
             self.startProxyServer(
                 server: server,
                 port: port,
@@ -74,10 +78,10 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 } else {
                     self.logInfo("🚀 隧道完全就绪")
                     
-                    // 关键修复：启动数据包处理循环
+                    // 5.代理启动成功后开启数据包处理循环
                     self.startReadingPackets()
                     
-                    // 关键：延迟500ms确保隧道稳定
+                    // 6. 延迟500ms确保隧道稳定后调用completionHandler
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         completionHandler(nil)
                         self.logInfo("✅ 调用完成处理程序")
@@ -90,7 +94,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     override func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
         logStopTunnel(reason: reason)
           
-          // 1. 停止代理服务
+          // 1. 停止代理服务  停止代理服务
           stopProxyServer()
           
           // 2. 停止数据包读取循环
@@ -100,7 +104,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 //          shadowsocksClient?.stop()
 //          shadowsocksClient = nil
           
-          // 4. 延迟确保资源释放
+          // 4. 延迟1秒确保资源释放后调用completionHandler
           DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {
               self.logInfo("🛑 隧道已完全停止")
               completionHandler()

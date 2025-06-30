@@ -12,7 +12,7 @@ import NetworkExtension
     @objc public static let shared = VPNConfigManager()
     
     @objc public private(set) var tunnelManager: NETunnelProviderManager?
-    // 加载或创建VPN配置
+    // MARK: - VPN配置管理
     @objc public func loadOrCreateConfiguration(completion: @escaping (Bool) -> Void) {
         NETunnelProviderManager.loadAllFromPreferences { [weak self] (managers, error) in
             guard let self = self else { return }
@@ -62,12 +62,12 @@ import NetworkExtension
                          }
                          print("[VPNConfig] 加载配置成功")
 
-                         // 1. 配置协议
+                         // 1. 配置隧道协议
                          let protocolConfig = NETunnelProviderProtocol()
-                         protocolConfig.providerBundleIdentifier = "com.talkcloud.name.SRVDemo.PacketTunnel" // 替换为你的扩展bundle ID
+                         protocolConfig.providerBundleIdentifier = "com.talkcloud.name.SRVDemo.PacketTunnel" //                 // 设置服务器地址（显示在VPN设置的服务器字段）
                          protocolConfig.serverAddress = server
                          
-                         // 2. 添加自定义配置
+                         // 2. 添加自定义配置（这些配置将传递给PacketTunnelProvider）
                          var providerConfig = [String: Any]()
                          providerConfig["server"] = server
                          providerConfig["port"] = port
@@ -80,12 +80,12 @@ import NetworkExtension
                          
                          protocolConfig.providerConfiguration = providerConfig
                          
-                         // 3. 应用配置
+                         // 3. 应用配置到manager
                          manager.protocolConfiguration = protocolConfig
                          manager.localizedDescription = "安全VPN连接"
                          manager.isEnabled = true
                          
-                         // 4. 保存配置
+                         // 4. 保存配置到系统偏好
                          manager.saveToPreferences { error in
                              if let error = error {
                                  print("[VPNConfig] 保存配置失败: \(error)")
@@ -94,7 +94,7 @@ import NetworkExtension
                              }
                              print("[VPNConfig] 配置保存成功")
 
-                             // 5. 加载配置后启动VPN
+                             // 5. 再次加载配置（确保配置已保存并生效），然后启动VPN隧道
                              manager.loadFromPreferences { error in
                                  if let error = error {
                                      print("[VPNConfig] 加载配置失败: \(error)")
