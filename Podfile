@@ -4,7 +4,10 @@ use_frameworks! :linkage => :static
 def shared_pods
   pod 'CocoaAsyncSocket', '~> 7.6.5'
   pod 'CryptoSwift', '~> 1.5.1'
-  pod 'NEKit', :path => './NEKit'
+#  pod 'NEKit', :git => 'https://github.com/zhuhaow/NEKit.git', :tag => '0.15.0'
+  pod 'NEKit', :modular_headers => true
+
+
 end
 
 target 'SRVDemo' do

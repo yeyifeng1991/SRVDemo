@@ -8,6 +8,7 @@
 import Foundation
 import NetworkExtension
 
+
 @objc public class VPNConfigManager: NSObject {
     @objc public static let shared = VPNConfigManager()
     

@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		6257657C18824515DD54A4CE /* Pods_SRVDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 757695E3F41F600F853DE1BF /* Pods_SRVDemo.framework */; };
-		8BA247FE9E523732F0E6CFA1 /* Pods_PacketTunnel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C50BA41558C9D07BC360DCAA /* Pods_PacketTunnel.framework */; };
-		EFA7FBF12E10D55A0017DBD9 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA7FBF02E10D55A0017DBD9 /* NetworkExtension.framework */; };
 		EFA7FBF92E10D55A0017DBD9 /* PacketTunnel.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EFA7FBEF2E10D55A0017DBD9 /* PacketTunnel.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -57,13 +55,6 @@
 			);
 			target = EF8D8B232E003F7C0006F0CD /* SRVDemo */;
 		};
-		EFA7FBFD2E10D55A0017DBD9 /* Exceptions for "PacketTunnel" folder in "PacketTunnel" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = EFA7FBEE2E10D55A0017DBD9 /* PacketTunnel */;
-		};
 		EFA7FCF42E10E6450017DBD9 /* Exceptions for "PacketTunnel" folder in "SRVDemo" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -86,7 +77,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				EFA7FCF42E10E6450017DBD9 /* Exceptions for "PacketTunnel" folder in "SRVDemo" target */,
-				EFA7FBFD2E10D55A0017DBD9 /* Exceptions for "PacketTunnel" folder in "PacketTunnel" target */,
 			);
 			path = PacketTunnel;
 			sourceTree = "<group>";
@@ -99,15 +89,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				6257657C18824515DD54A4CE /* Pods_SRVDemo.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		EFA7FBEC2E10D55A0017DBD9 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				EFA7FBF12E10D55A0017DBD9 /* NetworkExtension.framework in Frameworks */,
-				8BA247FE9E523732F0E6CFA1 /* Pods_PacketTunnel.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,8 +169,6 @@
 			buildPhases = (
 				030A651003EDC768E33282F0 /* [CP] Check Pods Manifest.lock */,
 				EFA7FBEB2E10D55A0017DBD9 /* Sources */,
-				EFA7FBEC2E10D55A0017DBD9 /* Frameworks */,
-				EFA7FBED2E10D55A0017DBD9 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -251,13 +230,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EFA7FBED2E10D55A0017DBD9 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -291,9 +263,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SRVDemo/Pods-SRVDemo-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SRVDemo/Pods-SRVDemo-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

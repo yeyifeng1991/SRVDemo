@@ -21,16 +21,24 @@ PODS:
   - CNIOLinux (2.40.0)
   - CNIOWindows (2.40.0)
   - CocoaAsyncSocket (7.6.5)
+  - CocoaLumberjack/Core (3.7.4)
+  - CocoaLumberjack/Swift (3.7.4):
+    - CocoaLumberjack/Core
   - CryptoSwift (1.5.1)
   - IQKeyboardManager (6.5.19)
   - Masonry (1.1.0)
   - MJRefresh (3.7.9)
-  - NEKit (0.15.0):
-    - CocoaAsyncSocket (~> 7.6.5)
-    - CryptoSwift (~> 1.5.1)
+  - MMDB-Swift (0.5.1)
+  - NEKit (0.0.4):
+    - CocoaAsyncSocket (~> 7.6.4)
+    - CocoaLumberjack/Swift (~> 3.7.0)
+    - MMDB-Swift (~> 0.5.1)
+    - sodium-ios (~> 0.0.2)
+    - Yaml (~> 3.4.4)
   - SDWebImage (5.21.1):
     - SDWebImage/Core (= 5.21.1)
   - SDWebImage/Core (5.21.1)
+  - sodium-ios (0.0.2)
   - SwiftNIO (2.40.0):
     - _NIODataStructures (= 2.40.0)
     - CNIOAtomics (= 2.40.0)
@@ -107,6 +115,7 @@ PODS:
     - SwiftNIOFoundationCompat (< 3, >= 2.32.0)
     - SwiftNIOPosix (< 3, >= 2.32.0)
     - SwiftNIOTLS (< 3, >= 2.32.0)
+  - Yaml (3.4.4)
   - YYModel (1.0.4)
 
 DEPENDENCIES:
@@ -117,7 +126,7 @@ DEPENDENCIES:
   - IQKeyboardManager
   - Masonry (= 1.1.0)
   - MJRefresh
-  - NEKit (from `./NEKit`)
+  - NEKit
   - SDWebImage
   - SwiftNIO (~> 2.0)
   - SwiftNIOExtras (~> 1.0)
@@ -134,11 +143,15 @@ SPEC REPOS:
     - CNIOLinux
     - CNIOWindows
     - CocoaAsyncSocket
+    - CocoaLumberjack
     - CryptoSwift
     - IQKeyboardManager
     - Masonry
     - MJRefresh
+    - MMDB-Swift
+    - NEKit
     - SDWebImage
+    - sodium-ios
     - SwiftNIO
     - SwiftNIOConcurrencyHelpers
     - SwiftNIOCore
@@ -148,11 +161,8 @@ SPEC REPOS:
     - SwiftNIOPosix
     - SwiftNIOTLS
     - SwiftNIOTransportServices
+    - Yaml
     - YYModel
-
-EXTERNAL SOURCES:
-  NEKit:
-    :path: "./NEKit"
 
 SPEC CHECKSUMS:
   _NIODataStructures: 3d45d8e70a1d17a15b1dc59d102c63dbc0525ffd
@@ -163,12 +173,15 @@ SPEC CHECKSUMS:
   CNIOLinux: 62e3505f50de558c393dc2f273dde71dcce518da
   CNIOWindows: 3047f2d8165848a3936a0a755fee27c6b5ee479b
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
+  CocoaLumberjack: 543c79c114dadc3b1aba95641d8738b06b05b646
   CryptoSwift: c4f2debceb38bf44c80659afe009f71e23e4a082
   IQKeyboardManager: c8665b3396bd0b79402b4c573eac345a31c7d485
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   MJRefresh: ff9e531227924c84ce459338414550a05d2aea78
-  NEKit: d8670740691fc662631383f954d7321672e5bc68
+  MMDB-Swift: c1089703b65a3d1301fc92ff8f55d4794a569214
+  NEKit: 3c658d89a4a17c3143f887c3034ef65106fb3fae
   SDWebImage: f29024626962457f3470184232766516dee8dfea
+  sodium-ios: ebfdcc372b70d59940dc22a989f7cdd4c8a72ba2
   SwiftNIO: 829958aab300642625091f82fc2f49cb7cf4ef24
   SwiftNIOConcurrencyHelpers: 697370136789b1074e4535eaae75cbd7f900370e
   SwiftNIOCore: 473fdfe746534d7aa25766916459eeaf6f92ef49
@@ -178,8 +191,9 @@ SPEC CHECKSUMS:
   SwiftNIOPosix: b49af4bdbecaadfadd5c93dfe28594d6722b75e4
   SwiftNIOTLS: 598af547490133e9aac52aed0c23c4a90c31dcfc
   SwiftNIOTransportServices: 0b2b407819d82eb63af558c5396e33c945759503
+  Yaml: 52831fc1d9ac2db4ddf6d7562993457127256ca6
   YYModel: 2a7fdd96aaa4b86a824e26d0c517de8928c04b30
 
-PODFILE CHECKSUM: d658c28a07f3c50cccf6567bc4e86da05485a97c
+PODFILE CHECKSUM: a30e5f0c6149330c061911f7352e2e3c6107c0fd
 
 COCOAPODS: 1.16.2

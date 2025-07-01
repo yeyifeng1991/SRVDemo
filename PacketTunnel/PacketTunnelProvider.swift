@@ -6,6 +6,7 @@
 //
 import NetworkExtension
 import os.log
+import NEKit
 //startShadowsocksProxy 方法中，"实际代理启动代码" 是指您需要集成 Shadowsocks 库（如 Shadowsocks-iOS）
 //private var shadowsocksClient: ShadowsocksClient? // 添加代理客户端引用
 private var isReadingPackets = false // 添加读取状态标志
