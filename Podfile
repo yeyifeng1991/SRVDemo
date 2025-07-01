@@ -7,7 +7,6 @@ def shared_pods
 #  pod 'NEKit', :git => 'https://github.com/zhuhaow/NEKit.git', :tag => '0.15.0'
   pod 'NEKit', :modular_headers => true
 
-
 end
 
 target 'SRVDemo' do
