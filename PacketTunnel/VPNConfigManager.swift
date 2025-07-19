@@ -26,18 +26,37 @@ import NetworkExtension
     @objc public func loadOrCreateConfiguration(completion: @escaping (Bool) -> Void) {
         NETunnelProviderManager.loadAllFromPreferences { [weak self] (managers, error) in
             guard let self = self else { return }
-            
+
             if let error = error {
-                print("加载VPN配置失败: \(error)")
+                print("[VPNConfigManager] 加载VPN配置失败: \(error)")
                 completion(false)
                 return
             }
-            
-            if let manager = managers?.first {
+
+            let existingManager = managers?.first
+
+            if let manager = existingManager,
+               let proto = manager.protocolConfiguration as? NETunnelProviderProtocol,
+               proto.providerBundleIdentifier == "com.talkcloud.name.SRVDemo.PacketTunnel" {
+                // ✅ 已存在且配置正确，使用该配置
                 self.tunnelManager = manager
                 completion(true)
             } else {
-                self.createNewConfiguration(completion: completion)
+                // ⚠️ 存在但配置错误，先删除再重新创建
+                if let manager = existingManager {
+                    manager.removeFromPreferences { [weak self] error in
+                        if let error = error {
+                            print("[VPNConfigManager] 删除旧配置失败: \(error)")
+                            completion(false)
+                            return
+                        }
+                        print("[VPNConfigManager] 旧配置已删除，创建新配置")
+                        self?.createNewConfiguration(completion: completion)
+                    }
+                } else {
+                    // ✅ 不存在任何配置，直接创建新配置
+                    self.createNewConfiguration(completion: completion)
+                }
             }
         }
     }
@@ -46,10 +65,15 @@ import NetworkExtension
         let manager = NETunnelProviderManager()
         manager.localizedDescription = "安全VPN连接"
         manager.isEnabled = true
-        
+
+        let tunnelProtocol = NETunnelProviderProtocol()
+        tunnelProtocol.serverAddress = "VPN" // 任意非空字符串即可
+        tunnelProtocol.providerBundleIdentifier = "com.talkcloud.name.SRVDemo.PacketTunnel"
+        manager.protocolConfiguration = tunnelProtocol
+
         manager.saveToPreferences { [weak self] error in
             if let error = error {
-                print("创建VPN配置失败: \(error)")
+                print("[VPNConfigManager] 创建VPN配置失败: \(error)")
                 completion(false)
             } else {
                 self?.tunnelManager = manager
@@ -67,7 +91,7 @@ import NetworkExtension
         method: String?,
         completion: @escaping (Error?) -> Void
     ) {
-        print("[VPNConfig] 开始启动VPN - 服务器: \(server):\(port), 协议: \(protocolType), 方法: \(method ?? "默认")")
+        print("[VPNConfigManager] 开始启动VPN - 服务器: \(server):\(port), 协议: \(protocolType), 方法: \(method ?? "默认")")
         
         loadOrCreateConfiguration { [weak self] success in
             guard let self = self, success, let manager = self.tunnelManager else {
@@ -98,7 +122,7 @@ import NetworkExtension
             // 保存配置
             manager.saveToPreferences { [weak self] error in
                 if let error = error {
-                    print("[VPNConfig] 保存配置失败: \(error)")
+                    print("[VPNConfigManager] 保存配置失败: \(error)")
                     completion(error)
                     return
                 }
@@ -106,7 +130,7 @@ import NetworkExtension
                 // 加载配置后启动VPN
                 manager.loadFromPreferences { [weak self] error in
                     if let error = error {
-                        print("[VPNConfig] 加载配置失败: \(error)")
+                        print("[VPNConfigManager] 加载配置失败: \(error)")
                         completion(error)
                         return
                     }
@@ -114,10 +138,10 @@ import NetworkExtension
                     do {
                         try manager.connection.startVPNTunnel()
                         self?.tunnelManager = manager
-                        print("[VPNConfig] VPN隧道启动命令已发送")
+                        print("[VPNConfigManager] VPN隧道启动命令已发送")
                         completion(nil)
                     } catch {
-                        print("[VPNConfig] 启动隧道失败: \(error)")
+                        print("[VPNConfigManager] 启动隧道失败: \(error)")
                         completion(error)
                     }
                 }
@@ -126,7 +150,7 @@ import NetworkExtension
     }
     
     @objc public func stopVPN(completion: @escaping (Error?) -> Void) {
-        print("[VPNConfig] 停止VPN命令已发送")
+        print("[VPNConfigManager] 停止VPN命令已发送")
         tunnelManager?.connection.stopVPNTunnel()
         completion(nil)
     }

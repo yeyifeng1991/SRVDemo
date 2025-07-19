@@ -1,0 +1,3 @@
+[submodule "NEKit"]
+	path = NEKit
+	url = https://github.com/tospery/NEKit.git
