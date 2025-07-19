@@ -13,9 +13,13 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     private var proxyServer: GCDSOCKS5ProxyServer?
     private var proxyRunning = false
     private var tunInterface: TUNInterface?
-    
+    override init() {
+        super.init()
+        NSLog("[PacketTunnel] init")
+    }
+
     override func startTunnel(options: [String : NSObject]?, completionHandler: @escaping (Error?) -> Void) {
-        NSLog("[PacketTunnel] 准备启动 Shadowsocks 隧道")
+        NSLog("[PacketTunnel] 准备启动  startTunnel 被调用！")
 
         guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
               let providerConfig = protocolConfiguration.providerConfiguration else {
