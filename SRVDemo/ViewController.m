@@ -160,36 +160,60 @@
                [self updateConnectionUI];
            }
        }];
-    /**
-     旧逻辑
-     // 尝试多次启动
-     for (int i = 0; i < 3; i++) {
-         [self.proxyWrapper setupShadowSocksProxyWithServerAddress:serverAddress
-                                                             port:port
-                                                         password:password
-                                                       encryption:encryption];
-         
-         NSError *error = nil;
-         [self.proxyWrapper startProxyAndReturnError:&error];
-         
-         if (!error) {
-             NSLog(@"✅ VPN 成功启动 (尝试 %d)", i+1);
-             model.connectType = ClashConnectSuccess;
-             break;
-         }
-         
-         NSLog(@"⚠️ 启动失败 (尝试 %d): %@", i+1, error.localizedDescription);
-         [NSThread sleepForTimeInterval:0.5]; // 等待0.5秒后重试
-     }
 
-     if (model.connectType != ClashConnectSuccess) {
-         NSLog(@"❌ VPN 启动失败");
-         model.connectType = ClashConnectFail;
-     }
-     
-     */
-    
+//    [self setupTunnel];
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        [self loadFromPreference];
+//    });
 }
+// MARK: -设置 Tunnel（类似初始化 VPN 配置）
+- (void)setupTunnel {
+    // 创建 VPN 管理器实例
+    NETunnelProviderManager *manager = [[NETunnelProviderManager alloc] init];
+    // 创建 VPN 协议配置（对应 PacketTunnel）
+       NETunnelProviderProtocol *protocol = [[NETunnelProviderProtocol alloc] init];
+       protocol.providerBundleIdentifier = @"com.talkcloud.name.SRVDemo.PacketTunnel"; // ⚠️ 这里必须和 PacketTunnel Extension 的 bundle ID 一致
+       protocol.serverAddress = @"ShadowsocksVPN"; // 随意填（但不能为 nil），表示 VPN 的名字
+       protocol.providerConfiguration = @{
+           @"host": @"139.224.0.129",
+           @"port": @4000,
+           @"password": @"test1234",
+           @"method": @"aes-256-gcm",
+           @"protocol": @"shadowsocks"
+       };
+       protocol.disconnectOnSleep = NO; // 休眠是否断开 VPN
+
+       manager.protocolConfiguration = protocol;   // 设置协议
+       manager.localizedDescription = @"Shadowsocks VPN";
+       manager.enabled = YES; // 启用配置
+    // 保存 VPN 配置到系统
+       [manager saveToPreferencesWithCompletionHandler:^(NSError * _Nullable error) {
+           if (error) {
+               NSLog(@"[VPN] 保存配置失败: %@", error);
+           } else {
+               NSLog(@"[VPN] 配置已保存成功");
+           }
+       }];
+}
+// MARK: - 从系统加载 VPN 配置并启动 VPN
+- (void)loadFromPreference{
+    [[NEVPNManager sharedManager] loadFromPreferencesWithCompletionHandler:^(NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"加载配置失败: %@", error);
+            return;
+        }
+
+        NSError *startError = nil;
+        [[NEVPNManager sharedManager].connection startVPNTunnelAndReturnError:&startError];
+
+        if (startError) {
+            NSLog(@"启动 VPN 失败: %@", startError);
+        } else {
+            NSLog(@"VPN 启动成功");
+        }
+    }];
+}
+
 - (void)showErrorAlert:(NSString *)message {
     dispatch_async(dispatch_get_main_queue(), ^{
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"VPN错误"

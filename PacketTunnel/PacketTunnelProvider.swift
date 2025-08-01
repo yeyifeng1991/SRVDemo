@@ -10,9 +10,9 @@ import NEKit
 
 class PacketTunnelProvider: NEPacketTunnelProvider {
 
-    private var proxyServer: GCDSOCKS5ProxyServer?
+    private var proxyServer: GCDSOCKS5ProxyServer? //本地 socks5 服务器
     private var proxyRunning = false
-    private var tunInterface: TUNInterface?
+    private var tunInterface: TUNInterface? // 虚拟 TUN 接口
     override init() {
         super.init()
         NSLog("[PacketTunnel] init")
@@ -47,12 +47,12 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         // 1. 停止旧代理
         stopProxy()
 
-        // 2. 校验加密方式
+        // 2. 验证加密算法是否支持
         guard let algorithm = CryptoAlgorithm(rawValue: method) else {
             throw NSError(domain: "Invalid cipher method: \(method)", code: -1, userInfo: nil)
         }
 
-        // 3. 构建加密器
+        // 3. 创建 Shadowsocks 加密器
         let cryptorFactory = ShadowsocksAdapter.CryptoStreamProcessor.Factory(password: password, algorithm: algorithm)
 
         // 4. 创建 Shadowsocks 适配器工厂
@@ -64,25 +64,39 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             streamObfuscaterFactory: ShadowsocksAdapter.StreamObfuscater.Factory()
         )
 
-        // 5. 配置转发规则（所有流量都转发）
+        // 5. 设置代理规则：所有请求都走这个代理（所有流量都转发）
         let ruleManager = RuleManager(fromRules: [
             AllRule(adapterFactory: ssAdapterFactory)
         ])
         RuleManager.currentManager = ruleManager
 
-        // 6. 创建本地 GCDSOCKS5 代理服务器
+        // 6. 创建本地 GCDSOCKS5 代理服务器 （NEKit 的代理转发组件）
          let localProxyPort: UInt16 = 1086
         proxyServer = GCDSOCKS5ProxyServer(
             address: IPAddress(fromString: "127.0.0.1"),
             port: Port(integerLiteral: UInt16(localProxyPort))
         )
-         try proxyServer?.start()
+         try proxyServer?.start() // 启动 socks5 服务
 //
-//         // 7. 配置 TCP Stack
+//         // 7. 设置 TCPStack，把数据转发给代理
          let tcpStack = TCPStack.stack
          tcpStack.proxyServer = proxyServer
 
-//         // 8. 创建 TUNInterface，绑定 packetFlow
+//         //8. 创建TUNInterface虚拟网络接口，挂接 TUN
+        /**
+         TUN（network TUNnel）接口是一种虚拟的网络设备，它在操作系统中扮演一个“假装的网卡”，用于收发 IP 层的数据包。其作用是：
+         你可以把 TUN 看成是一个“假网卡”：
+         设备发起网络请求（如访问 Google）
+         数据包本该通过真实的网卡发出（如 Wi-Fi）
+         但你通过 TUN 把数据“劫持”了
+         你拿到这些原始 IP 包，可以：
+         加密
+         改路径
+         发往代理服务器（如 Shadowsocks）
+         再返回结果
+         最终的效果是：
+         📡 系统以为访问网络正常，其实数据流量被你拦截→加工→转发→返回。
+         */
          let interface = TUNInterface(packetFlow: self.packetFlow)
          interface.register(stack: tcpStack)
 //

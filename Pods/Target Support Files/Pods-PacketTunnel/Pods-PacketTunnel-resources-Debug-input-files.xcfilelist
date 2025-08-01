@@ -1,0 +1,3 @@
+${PODS_ROOT}/Target Support Files/Pods-PacketTunnel/Pods-PacketTunnel-resources.sh
+${PODS_CONFIGURATION_BUILD_DIR}/CocoaLumberjack/CocoaLumberjackPrivacy.bundle
+${PODS_ROOT}/Resolver/Sources/PrivacyInfo.xcprivacy
